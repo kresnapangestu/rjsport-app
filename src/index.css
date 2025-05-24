@@ -1,10 +1,57 @@
+@font-face {
+  font-family: "Funnel Display";
+  src: url("/public/fonts/FunnelDisplay-Light.ttf") format("ttf");
+  font-weight: 300; /* Atur ketebalan font yang sesuai */
+  font-style: normal;
+  font-display: swap; /* Opsional: untuk mengontrol bagaimana font dirender saat belum diunduh */
+}
+
+@font-face {
+  font-family: "Funnel Display";
+  src: url("/public/fonts/FunnelDisplay-Regular.ttf") format("ttf");
+  font-weight: 400; /* Atur ketebalan font yang sesuai */
+  font-style: normal;
+  font-display: swap; /* Opsional: untuk mengontrol bagaimana font dirender saat belum diunduh */
+}
+
+@font-face {
+  font-family: "Funnel Display";
+  src: url("/public/fonts/FunnelDisplay-Medium.ttf") format("ttf");
+  font-weight: 500; /* Atur ketebalan font yang sesuai */
+  font-style: normal;
+  font-display: swap; /* Opsional: untuk mengontrol bagaimana font dirender saat belum diunduh */
+}
+
+@font-face {
+  font-family: "Funnel Display";
+  src: url("/public/fonts/FunnelDisplay-SemiBold.ttf") format("ttf");
+  font-weight: 600; /* Atur ketebalan font yang sesuai */
+  font-style: normal;
+  font-display: swap; /* Opsional: untuk mengontrol bagaimana font dirender saat belum diunduh */
+}
+
+/* Tambahkan varian font lain jika ada (misalnya, bold, italic) */
+@font-face {
+  font-family: "Funnel Display";
+  src: url("/public/fonts/FunnelDisplay-Bold.ttf") format("ttf");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Funnel Display";
+  src: url("/public/fonts/FunnelDisplay-ExtraBold.ttf") format("ttf");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
 body {
   background: #f5f7fa;
   margin: 0;
   color: #2e3b4e;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
+  font-family: "Funnel Display", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -31,6 +78,22 @@ code {
   font-family: Arial, sans-serif;
 }
 
+.logout-button {
+  margin-bottom: 2rem;
+  background: none;
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: 3px;
+}
+
+.logout-button:hover {
+  background: #1d5c9c;
+}
 .sidebar-link {
   display: block;
   margin: 8px 0;
@@ -51,4 +114,33 @@ code {
 .sidebar-link.active {
   font-weight: bold;
   background: #1d5c9c;
+}
+
+.pdf-viewer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.pdf-controls {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.pdf-document {
+  border: 1px solid #ddd;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  max-width: 100%;
+}
+
+.react-pdf__Page {
+  margin: 0 auto;
+}
+
+.react-pdf__Page__textContent,
+.react-pdf__Page__annotations {
+  display: none;
 }

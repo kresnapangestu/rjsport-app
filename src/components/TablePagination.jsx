@@ -7,7 +7,6 @@ function TablePagination({ page, totalPages, onPageChange }) {
     alignItems: "center",
     marginTop: "1rem",
     gap: "0.5rem",
-    fontFamily: "Arial, sans-serif",
   };
 
   const buttonStyle = {

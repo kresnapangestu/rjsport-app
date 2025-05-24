@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
+import { requiredValidator } from "@/services/GeneralHelper";
 
 function Input({
   label,
@@ -12,8 +13,38 @@ function Input({
   helperText = "",
   name,
   style,
+  validate = () => "",
+  required = false,
 }) {
   const [isFocused, setFocused] = useState(false);
+  const [localError, setLocalError] = useState("");
+
+  const runValidation = (val) => {
+    const validators = [];
+
+    if (required) validators.push(requiredValidator(label)); // use label as field name
+    if (validate) validators.push(validate);
+
+    for (const fn of validators) {
+      const result = fn(val);
+      if (result) return result;
+    }
+
+    return "";
+  };
+
+  const handleChange = (e) => {
+    const val = e.target.value;
+    onChange(e);
+    const errorMessage = runValidation(val);
+    setLocalError(errorMessage);
+  };
+
+  const handleBlur = () => {
+    setFocused(false);
+    const errorMessage = runValidation(value);
+    setLocalError(errorMessage);
+  };
 
   const showFloatingLabel = isFocused || value;
 
@@ -22,7 +53,6 @@ function Input({
     flexDirection: "column",
     flex: 1,
     marginBottom: "1.5rem",
-    fontFamily: "Arial, sans-serif",
     position: "relative",
     width: "100%",
   };
@@ -52,7 +82,7 @@ function Input({
 
   const helperTextStyle = {
     fontSize: "0.75rem",
-    color: error ? "#d32f2f" : "#777",
+    color: error || localError ? "#d32f2f" : "#777",
     marginTop: "0.25rem",
     marginLeft: "0.25rem",
   };
@@ -64,14 +94,16 @@ function Input({
         type={type}
         name={name}
         value={value}
-        onChange={onChange}
+        onChange={handleChange}
         placeholder={showFloatingLabel ? placeholder : ""}
         disabled={disabled}
         onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
+        onBlur={handleBlur}
         style={inputStyle}
       />
-      {helperText && <div style={helperTextStyle}>{helperText}</div>}
+      {(helperText || localError) && (
+        <div style={helperTextStyle}>{localError || helperText}</div>
+      )}
     </div>
   );
 }
@@ -87,6 +119,8 @@ Input.propTypes = {
   error: PropTypes.bool,
   helperText: PropTypes.string,
   style: PropTypes.object,
+  validate: PropTypes.func,
+  required: PropTypes.bool,
 };
 
 export default Input;

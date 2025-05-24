@@ -1,20 +1,22 @@
 import React, { useState } from "react";
-// import { useAuth } from "../auth/AuthContext";
-import { useAuth } from "../contexts/AuthContexts";
-import Table from "../components/Table";
-import TableRow from "../components/TableRow";
-import TablePagination from "../components/TablePagination";
-import TableHeader from "../components/TableHeader";
-import TableCell from "../components/TableCell";
-import { TableBody } from "../components/TableBody";
-import Title from "../components/Title";
-import Paper from "../components/Paper";
-import Button from "../components/Button";
-import Modal from "../components/Modal";
-import Select from "../components/Select";
-import Input from "../components/Input";
-import Textarea from "../components/TextArea";
-import Breadcrumbs from "../components/Breadcrumbs";
+import Table from "@/components/Table";
+import TableRow from "@/components/TableRow";
+import TablePagination from "@/components/TablePagination";
+import TableHeader from "@/components/TableHeader";
+import TableCell from "@/components/TableCell";
+import { TableBody } from "@/components/TableBody";
+import Title from "@/components/Title";
+import Paper from "@/components/Paper";
+import Button from "@/components/Button";
+import Modal from "@/components/Modal";
+import Select from "@/components/Select";
+import Input from "@/components/Input";
+import Textarea from "@/components/TextArea";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import { Plus } from "lucide-react";
+import FileInput from "@/components/FileInput";
+import { validationSchema } from "@/services/GeneralHelper";
+import { toast } from "react-toastify";
 
 const columns = [
   { key: "no", label: "No" },
@@ -47,17 +49,46 @@ function BiroHukumPage() {
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
+    console.log(name, value, files);
     setFormData((prev) => ({
       ...prev,
       [name]: files ? files[0] : value,
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Submitted:", formData);
-  };
 
+    try {
+      console.log("Submitted:", formData);
+
+      if (
+        !formData.noSpp ||
+        !formData.tahun ||
+        !formData.jenisSpp ||
+        !formData.dokumen ||
+        !formData.keterangan
+      ) {
+        toast.error("Mohon lengkapi semua field yang diperlukan.");
+        return;
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      toast.success("Data berhasil disimpan!");
+      setIsOpenModal(false);
+      setFormData({
+        noSpp: "",
+        tahun: "",
+        jenisSpp: "",
+        dokumen: null,
+        keterangan: "",
+      });
+    } catch (err) {
+      console.error(err);
+      toast.error("Gagal menyimpan data. Silakan coba lagi.");
+    }
+  };
   const paginatedData = allData.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
@@ -82,6 +113,7 @@ function BiroHukumPage() {
           onClick={() => setIsOpenModal(true)}
           style={{ width: "fit-content" }}
           variant="danger"
+          icon={<Plus size={20} />}
         >
           Tambah Arsip
         </Button>
@@ -139,62 +171,46 @@ function BiroHukumPage() {
             name="noSpp"
             value={formData.noSpp}
             onChange={handleChange}
+            validate={validationSchema.onlyNumber}
+            required
             placeholder="Masukkan nomor SPP"
           />
-
           <Input
             label="Tahun"
             name="tahun"
             value={formData.tahun}
             onChange={handleChange}
+            validate={validationSchema.year}
+            required
             placeholder="Masukkan tahun"
           />
-
-          {/* Jenis SPP - Select */}
           <Select
             label="Jenis SPP"
             name="jenisSpp"
             value={formData.jenisSpp}
             onChange={handleChange}
+            required
             options={[
               { label: "UP", value: "UP" },
               { label: "GU", value: "GU" },
               { label: "TU", value: "TU" },
             ]}
           />
-
-          {/* Dokumen - File Upload */}
-          <div style={{ marginBottom: "1.5rem" }}>
-            <label
-              style={{
-                display: "block",
-                marginBottom: "0.5rem",
-                color: "#333",
-              }}
-            >
-              Dokumen
-            </label>
-            <input
-              type="file"
-              name="dokumen"
-              onChange={handleChange}
-              style={{
-                padding: "0.5rem 0",
-                fontSize: "1rem",
-              }}
-            />
-          </div>
-
-          {/* Keterangan - Textarea */}
+          <FileInput
+            label="Dokumen"
+            name="dokumen"
+            onChange={handleChange}
+            required
+          />
           <Textarea
             label="Keterangan"
+            name="keterangan"
             value={formData.keterangan}
+            required
             onChange={handleChange}
             placeholder="Masukkan keterangan tambahan"
-            // helperText="Optional"
             rows={5}
           />
-
           <Button type="submit" style={{ float: "right" }}>
             Submit
           </Button>

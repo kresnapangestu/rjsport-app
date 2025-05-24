@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { fetchHelper } from "../services/FetchHelper";
 // import { useAuth } from "../auth/AuthContext";
 import { useAuth } from "../contexts/AuthContexts";
+import Button from "../components/Button";
+import Input from "../components/Input";
+import { validationSchema } from "../services/GeneralHelper";
 
 function LoginPage() {
   const [satker, setSatker] = useState("");
@@ -12,6 +15,19 @@ function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
+  const [formData, setFormData] = useState({
+    satker: "",
+    password: "",
+  });
+
+  const handleChange = (e) => {
+    const { name, value, files } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: files ? files[0] : value,
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -20,7 +36,7 @@ function LoginPage() {
       const userData = await fetchHelper(
         "https://api.rokeubmn-pa.id/auth/login",
         "POST",
-        { "biro_code" : satker, password }
+        { biro_code: satker, password }
       );
       //   const userData = await fakeLogin(email, password);
       login(userData);
@@ -34,29 +50,70 @@ function LoginPage() {
 
   return (
     <div>
-      <h2>Login</h2>
-      {/* {error && <p style={{ color: "red" }}>{error}</p>} */}
-      <form onSubmit={handleSubmit}>
-        <input
-          type="number"
-          placeholder="No Satker"
-          value={satker}
-          onChange={(e) => setSatker(e.target.value)}
-          required
-        />
-        <br />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <br />
-        <button type="submit" disabled={loading}>
-          {loading ? "Logging in..." : "Login"}
-        </button>
-      </form>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "45vw 55vw",
+          height: "100vh",
+        }}
+      >
+        <div style={{ margin: "25% 30%" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              marginBottom: "2rem",
+            }}
+          >
+            <img src="/logo-kemnaker-ori.png" alt="logo" width="200"></img>
+          </div>
+          <div
+            style={{
+              width: "100%",
+              marginBottom: "2rem",
+              textAlign: "center",
+            }}
+          >
+            <span style={{ fontWeight: 600, fontSize: 28 }}>
+              Selamat Datang di Arsip Kemnaker
+            </span>
+          </div>
+          {/* {error && <p style={{ color: "red" }}>{error}</p>} */}
+          <form onSubmit={handleSubmit}>
+            <Input
+              label="Satuan Kerja"
+              name="satker"
+              required
+              value={formData.satker}
+              validate={validationSchema.onlyNumber}
+              onChange={handleChange}
+            />
+
+            <Input
+              label="Password"
+              type="password"
+              name="password"
+              required
+              value={formData.password}
+              onChange={handleChange}
+            />
+
+            <Button type="submit" style={{ width: "100%" }}>
+              Login
+            </Button>
+          </form>
+        </div>
+        <div
+          style={{
+            backgroundImage: 'url("/login-background-2.jpg")',
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            height: "100vh",
+            width: "100%",
+          }}
+        ></div>
+      </div>
     </div>
   );
 }

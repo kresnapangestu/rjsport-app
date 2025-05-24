@@ -9,6 +9,7 @@ function Button({
   onClick,
   children,
   style,
+  icon = null,
 }) {
   const [isHovered, setHovered] = useState(false);
   const [isActive, setActive] = useState(false);
@@ -93,7 +94,12 @@ function Button({
       onFocus={() => setFocused(true)}
       onBlur={() => setFocused(false)}
     >
-      {children}
+      <div
+        style={{ display: "inline-flex", alignItems: "center", gap: "0.5em" }}
+      >
+        {icon && icon}
+        <span style={{ lineHeight: icon ? "25px" : 0 }}>{children}</span>
+      </div>
     </button>
   );
 }

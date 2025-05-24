@@ -5,7 +5,7 @@ import { NavLink } from "react-router-dom";
 const menuItems = [
   //   { name: "Dashboard", path: "/dashboard" },
   { name: "Satuan Kerja", path: "/satuan-kerja", icon: <Building /> },
-  { name: "Arsip", path: "/archieve", icon: <Archive /> },
+  // { name: "Arsip", path: "/archieve", icon: <Archive /> },
   { name: "Kompilasi", path: "/compilation", icon: <Layers /> },
 ];
 
@@ -29,7 +29,7 @@ function Sidebar() {
     >
       <div>
         <img
-          //   src="/logo-kemnaker.png"
+          src="/logo-kemnaker.png"
           alt="logo"
           width="180"
           height="60"
@@ -52,23 +52,10 @@ function Sidebar() {
           ))}
         </nav>
       </div>
-      <button
-        // onClick={handleLogout}
-        style={{
-          marginBottom: "2rem",
-          background: "none",
-          border: "none",
-          color: "white",
-          display: "flex",
-          alignItems: "center",
-          gap: "0.5rem",
-          cursor: "pointer",
-          padding: "0.5rem 1rem",
-        }}
-      >
+      <span className="logout-button">
         <LogOut />
         Logout
-      </button>
+      </span>
     </div>
   );
 }

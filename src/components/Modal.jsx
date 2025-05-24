@@ -58,7 +58,6 @@ function Modal({ open, onClose, title, children }) {
         {title && (
           <h2
             style={{
-              marginBottom: "16px",
               marginTop: "0px",
               marginBottom: "2rem",
             }}
@@ -67,7 +66,7 @@ function Modal({ open, onClose, title, children }) {
           </h2>
         )}
 
-        <div style={{ width: "100%" }}>{children}</div>
+        <div style={{ marginTop: "2rem", width: "100%" }}>{children}</div>
       </div>
     </div>,
     document.getElementById("modal-root")
