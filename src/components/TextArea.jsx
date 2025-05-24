@@ -53,7 +53,6 @@ function Textarea({
     display: "flex",
     flexDirection: "column",
     flex: 1,
-    marginBottom: "1.5rem",
     position: "relative",
     width: "100%",
   };

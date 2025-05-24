@@ -1,6 +1,5 @@
 export async function fetchHelper(url, method, body) {
   try {
-    console.log("dev", body);
     const response = await fetch(url, {
       method: method,
       headers: {

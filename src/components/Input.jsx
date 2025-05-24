@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
+import { Eye, EyeClosed } from "lucide-react";
 import { requiredValidator } from "@/services/GeneralHelper";
 
 function Input({
@@ -18,6 +19,10 @@ function Input({
 }) {
   const [isFocused, setFocused] = useState(false);
   const [localError, setLocalError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
+  const isPassword = type === "password";
+  const inputType = isPassword ? (showPassword ? "text" : "password") : type;
 
   const runValidation = (val) => {
     const validators = [];
@@ -49,17 +54,14 @@ function Input({
   const showFloatingLabel = isFocused || value;
 
   const containerStyle = {
+    style: style?.width ?? "100%",
     display: "flex",
-    flexDirection: "column",
-    flex: 1,
-    marginBottom: "1.5rem",
     position: "relative",
-    width: "100%",
   };
 
   const labelStyle = {
     position: "absolute",
-    top: showFloatingLabel ? "-0.6rem" : "0.9rem",
+    top: showFloatingLabel ? "-0.6rem" : "0.7rem",
     left: "0.75rem",
     fontSize: showFloatingLabel ? "0.75rem" : "1rem",
     color: error ? "#d32f2f" : isFocused ? "#3f51b5" : "#777",
@@ -69,15 +71,26 @@ function Input({
     pointerEvents: "none",
   };
 
+  const toggleStyle = {
+    position: "absolute",
+    right: "0.5rem",
+    top: "50%",
+    transform: localError ? "translateY(-80%)" : "translateY(-50%)",
+    background: "none",
+    border: "none",
+    cursor: "pointer",
+    padding: 4,
+  };
+
   const inputStyle = {
-    // width: "100%",
+    ...style,
+    width: "100%",
     padding: "0.75rem",
     fontSize: "1rem",
     border: "1px solid #ccc",
     borderRadius: "4px",
     backgroundColor: "#fff",
     color: "#333",
-    ...style,
   };
 
   const helperTextStyle = {
@@ -91,7 +104,7 @@ function Input({
     <div style={containerStyle}>
       <label style={labelStyle}>{label}</label>
       <input
-        type={type}
+        type={inputType}
         name={name}
         value={value}
         onChange={handleChange}
@@ -101,6 +114,16 @@ function Input({
         onBlur={handleBlur}
         style={inputStyle}
       />
+      {isPassword && (
+        <button
+          type="button"
+          onClick={() => setShowPassword((prev) => !prev)}
+          style={toggleStyle}
+          tabIndex={-1}
+        >
+          {showPassword ? <EyeClosed size={18} /> : <Eye size={18} />}
+        </button>
+      )}
       {(helperText || localError) && (
         <div style={helperTextStyle}>{localError || helperText}</div>
       )}

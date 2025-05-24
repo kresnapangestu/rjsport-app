@@ -14,12 +14,12 @@ function TableCell({
     align === "right" ? "right" : align === "center" ? "center" : "left";
 
   const defaultStyle = {
-    padding: "12px 16px",
+    ...style,
+    padding: "10px 16px",
     textAlign,
     fontWeight: component === "th" ? 600 : 400,
     borderBottom: "1px solid #e0e0e0",
     ...sx,
-    ...style,
   };
 
   return (

@@ -9,6 +9,7 @@ function Select({
   value,
   onChange,
   options = [],
+  noPlaceholder = false,
   placeholder = `Pilih ${label} dari opsi berikut`,
   disabled = false,
   error = false,
@@ -55,41 +56,35 @@ function Select({
   const selectedLabel = options.find((opt) => opt.value === value)?.label;
 
   const containerStyle = {
+    ...style,
     position: "relative",
-    marginBottom: "1.5rem",
-    width: "100%",
+    width: style?.width || "100%",
   };
+
+  const showFloatingLabel = isFocused || value;
 
   const labelStyle = {
     position: "absolute",
-    top: placeholder ? "-0.6rem" : "0.9rem",
+    top: noPlaceholder
+      ? showFloatingLabel
+        ? "-0.6rem"
+        : "0.7rem"
+      : placeholder
+      ? "-0.6rem"
+      : "0.7rem",
     left: "0.75rem",
-    fontSize: placeholder ? "0.75rem" : "1rem",
+    fontSize: noPlaceholder
+      ? showFloatingLabel
+        ? "0.75rem"
+        : "1rem"
+      : placeholder
+      ? "0.75rem"
+      : "1rem",
     color: error ? "#d32f2f" : isFocused ? "#3f51b5" : "#777",
     backgroundColor: "white",
     padding: "0 4px",
     transition: "all 0.2s ease",
     pointerEvents: "none",
-  };
-
-  const selectStyle = {
-    width: "100%",
-    padding: "0.75rem",
-    fontSize: "1rem",
-    border: `1px solid ${error ? "#d32f2f" : isFocused ? "#3f51b5" : "#ccc"}`,
-    borderRadius: "4px",
-    backgroundColor: disabled ? "#f5f5f5" : "#fff",
-    color: disabled ? "#999" : "#333",
-    appearance: "none",
-    WebkitAppearance: "none",
-    MozAppearance: "none",
-    backgroundImage:
-      "url(\"data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0l5 6 5-6H0z' fill='%23333'/%3E%3C/svg%3E\")",
-    backgroundRepeat: "no-repeat",
-    backgroundPosition: "right 0.75rem center",
-    backgroundSize: "10px 6px",
-    transition: "border-color 0.2s ease",
-    ...style,
   };
 
   const helperTextStyle = {
@@ -108,13 +103,18 @@ function Select({
         onClick={() => !disabled && setIsOpen(!isOpen)}
         style={{
           padding: "0.75rem",
+          height: "1.1rem",
           border: `1px solid ${error ? "#d93025" : "#ccc"}`,
           borderRadius: "4px",
           backgroundColor: disabled ? "#f5f5f5" : "#fff",
           cursor: disabled ? "not-allowed" : "pointer",
         }}
       >
-        {selectedLabel || <span style={{ color: "#999" }}>{placeholder}</span>}
+        {selectedLabel || (
+          <span style={{ color: "#999" }}>
+            {noPlaceholder ? "" : placeholder}
+          </span>
+        )}
       </div>
       {isOpen && (
         <div

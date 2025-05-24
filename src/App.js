@@ -4,11 +4,13 @@ import LoginPage from "./pages/LoginPage";
 import { useAuth } from "./contexts/AuthContexts";
 import AppLayout from "./Layouts/AppLayout";
 import MenuPage from "./pages/Menu";
-import BiroHukumPage from "./pages/BiroHukum";
+import ListSatuanKerjaPage from "./pages/ListSatuankerja";
 import { ToastContainer } from "react-toastify";
 import CompilationPage from "./pages/Compilation";
 import "./index.css";
 import "react-toastify/dist/ReactToastify.css";
+import "react-datepicker/dist/react-datepicker.css";
+import UserManagementPage from "./pages/UserManagement";
 // import "@/PDFWorkerSetup";
 
 function App() {
@@ -31,10 +33,10 @@ function App() {
           }
         />
         <Route
-          path="/biro-hukum"
+          path="/satuan-kerja/biro-hukum"
           element={
             <AppLayout>
-              <BiroHukumPage />
+              <ListSatuanKerjaPage />
             </AppLayout>
           }
         />
@@ -43,6 +45,14 @@ function App() {
           element={
             <AppLayout>
               <CompilationPage />
+            </AppLayout>
+          }
+        />
+        <Route
+          path="/user-management"
+          element={
+            <AppLayout>
+              <UserManagementPage />
             </AppLayout>
           }
         />

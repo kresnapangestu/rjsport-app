@@ -58,7 +58,6 @@ function FileInput({
   };
 
   const containerStyle = {
-    marginBottom: "1.5rem",
     padding: "1rem",
     border: `1px dotted ${themeColors.primary.default}`,
     borderRadius: 5,

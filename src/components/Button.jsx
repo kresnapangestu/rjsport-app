@@ -55,10 +55,14 @@ function Button({
       fontSize: "0.875rem",
     },
     medium: {
+      padding: "0.5em 1.0em",
+      fontSize: "0.975rem",
+    },
+    large: {
       padding: "0.6em 1.2em",
       fontSize: "1rem",
     },
-    large: {
+    extraLarge: {
       padding: "0.8em 1.5em",
       fontSize: "1.125rem",
     },
@@ -98,7 +102,9 @@ function Button({
         style={{ display: "inline-flex", alignItems: "center", gap: "0.5em" }}
       >
         {icon && icon}
-        <span style={{ lineHeight: icon ? "25px" : 0 }}>{children}</span>
+        {children && (
+          <span style={{ lineHeight: icon ? "25px" : 0 }}>{children}</span>
+        )}
       </div>
     </button>
   );

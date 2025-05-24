@@ -68,6 +68,7 @@ code {
 
 .sidebar {
   width: 200px;
+  font-size: 14px !important;
   height: 100vh;
   background: #15406a;
   padding: 1rem;
@@ -75,25 +76,8 @@ code {
   top: 0;
   left: 0;
   overflow-y: auto;
-  font-family: Arial, sans-serif;
 }
 
-.logout-button {
-  margin-bottom: 2rem;
-  background: none;
-  border: none;
-  color: white;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-  padding: 0.5rem 1rem;
-  border-radius: 3px;
-}
-
-.logout-button:hover {
-  background: #1d5c9c;
-}
 .sidebar-link {
   display: block;
   margin: 8px 0;
@@ -130,6 +114,23 @@ code {
   align-items: center;
 }
 
+.logout-button {
+  margin-bottom: 2rem;
+  background: none;
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: 3px;
+}
+
+.logout-button:hover {
+  background: #1d5c9c;
+}
+
 .pdf-document {
   border: 1px solid #ddd;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -143,4 +144,22 @@ code {
 .react-pdf__Page__textContent,
 .react-pdf__Page__annotations {
   display: none;
+}
+
+th .sort-icon {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+th:hover .sort-icon {
+  opacity: 1;
+}
+
+.sort-icon {
+  opacity: 0;
+}
+
+th:hover .sort-icon,
+.sort-icon-active {
+  opacity: 1 !important;
 }

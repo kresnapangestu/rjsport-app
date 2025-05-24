@@ -1,17 +1,18 @@
-import { Archive, Building, Layers, LogOut } from "lucide-react";
+import { Archive, Building, Layers, LogOut, UserRoundCog } from "lucide-react";
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 
 const menuItems = [
-  //   { name: "Dashboard", path: "/dashboard" },
   { name: "Satuan Kerja", path: "/satuan-kerja", icon: <Building /> },
-  // { name: "Arsip", path: "/archieve", icon: <Archive /> },
   { name: "Kompilasi", path: "/compilation", icon: <Layers /> },
+  {
+    name: "Manajemen Akun",
+    path: "/user-management",
+    icon: <UserRoundCog />,
+  },
 ];
 
 function Sidebar() {
-  const [isHovered, setIsHovered] = useState(false);
-
   return (
     <div
       style={{
@@ -27,12 +28,11 @@ function Sidebar() {
         left: 0,
       }}
     >
-      <div>
+      <div style={{ justifyItems: "center" }}>
         <img
           src="/logo-kemnaker.png"
           alt="logo"
-          width="180"
-          height="60"
+          width="160"
           style={{ marginBottom: "2rem" }}
         ></img>
         <nav>

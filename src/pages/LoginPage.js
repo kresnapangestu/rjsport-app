@@ -76,7 +76,7 @@ function LoginPage() {
             }}
           >
             <span style={{ fontWeight: 600, fontSize: 28 }}>
-              Selamat Datang di Arsip Kemnaker
+              Selamat Datang di Arsip ROKEU BMN
             </span>
           </div>
           {/* {error && <p style={{ color: "red" }}>{error}</p>} */}

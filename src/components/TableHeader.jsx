@@ -1,8 +1,9 @@
 import React, { Children } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 function TableHeader({ children }) {
   const headerStyle = {
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#DBE9F8",
     textAlign: "left",
     padding: "0.75rem 1rem",
     fontWeight: 600,
