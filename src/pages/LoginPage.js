@@ -32,7 +32,10 @@ function LoginPage() {
     setLoading(true);
 
     var CryptoJS = require("crypto-js");
-    var encryptedPass = CryptoJS.AES.encrypt(formData.password, 'YzDWFXF8LmfUMdOn0RtZ0rYC90zF5wpoz87oCk').toString();
+    var encryptedPass = CryptoJS.AES.encrypt(
+      formData.password,
+      "YzDWFXF8LmfUMdOn0RtZ0rYC90zF5wpoz87oCk"
+    ).toString();
 
     try {
       const response = await fetchHelper(
@@ -40,7 +43,6 @@ function LoginPage() {
         "POST",
         { kode_biro: parseInt(formData.satker), password: encryptedPass }
       );
-
       // console.log(response)
       if (response?.success) {
         localStorage.setItem("token", response?.data?.access_token);
@@ -87,7 +89,10 @@ function LoginPage() {
             </span>
           </div>
           {/* {error && <p style={{ color: "red" }}>{error}</p>} */}
-          <form onSubmit={handleSubmit}>
+          <form
+            onSubmit={handleSubmit}
+            style={{ display: "flex", gap: 20, flexDirection: "column" }}
+          >
             <Input
               label="Satuan Kerja"
               name="satker"

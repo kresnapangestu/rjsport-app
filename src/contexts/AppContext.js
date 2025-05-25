@@ -1,3 +1,4 @@
+import { fetchUser } from "@/pages/Menu/menuHooks";
 import React, { createContext, useEffect, useState } from "react";
 
 export const AppContext = createContext();
@@ -18,6 +19,19 @@ export const AppProvider = ({ children }) => {
       }
     }
   }, [userData]);
+
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const userData = await fetchUser();
+        setUserData(userData.data);
+      } catch (error) {
+        console.error("Error loading menu:", error);
+      }
+    };
+
+    loadUser();
+  }, [setUserData]);
 
   return (
     <AppContext.Provider

@@ -19,7 +19,7 @@ export const allData = Array.from({ length: 20 }, (_, i) => ({
 }));
 
 export const fetchPDFAsBlob = async (url) => {
-  const token = process.env.REACT_APP_API_BASE_TOKEN;
+  const token = localStorage.getItem("token");
 
   const response = await fetch(url, {
     headers: {
