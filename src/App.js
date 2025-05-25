@@ -22,7 +22,7 @@ function App() {
       <Routes>
         <Route
           path="/"
-          element={user ? <Navigate to="/dashboard" /> : <LoginPage />}
+          element={user ? <Navigate to="/satuan-kerja" /> : <LoginPage />}
         />
         <Route
           path="/satuan-kerja"

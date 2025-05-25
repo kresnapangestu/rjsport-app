@@ -1,6 +1,6 @@
 import { Archive, Building, Layers, LogOut, UserRoundCog } from "lucide-react";
 import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { useNavigate, NavLink } from "react-router-dom";
 
 const menuItems = [
   { name: "Satuan Kerja", path: "/satuan-kerja", icon: <Building /> },
@@ -13,6 +13,8 @@ const menuItems = [
 ];
 
 function Sidebar() {
+  const navigate = useNavigate();
+
   return (
     <div
       style={{
@@ -52,7 +54,10 @@ function Sidebar() {
           ))}
         </nav>
       </div>
-      <span className="logout-button">
+      <span className="logout-button" onClick={() => {
+        localStorage.clear();
+        navigate("/");
+      }}>
         <LogOut />
         Logout
       </span>
