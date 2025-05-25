@@ -52,7 +52,6 @@ function UserManagementPage() {
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    console.log(name, value, files);
     setFormData((prev) => ({
       ...prev,
       [name]: files ? files[0] : value,
@@ -63,8 +62,6 @@ function UserManagementPage() {
     e.preventDefault();
 
     try {
-      console.log("Submitted:", formData);
-
       if (
         !formData.kodeBiro ||
         !formData.name ||
@@ -154,7 +151,7 @@ function UserManagementPage() {
               <TableRow
                 key={row.no}
                 sx={{
-                  "&:last-child td, &:last-child th": { borderBottom: "none" },
+                  "&:lastChild td, &:lastChild th": { borderBottom: "none" },
                 }}
               >
                 <TableCell component="th" scope="row" align="center">

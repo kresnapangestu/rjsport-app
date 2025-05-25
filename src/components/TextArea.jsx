@@ -34,7 +34,6 @@ function Textarea({
   };
 
   const handleChange = (e) => {
-    console.log(e.target.value);
     const val = e.target.value;
     onChange(e);
     const errorMessage = runValidation(val);

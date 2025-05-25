@@ -3,16 +3,27 @@ import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 
 const menuItems = [
-  { name: "Satuan Kerja", path: "/satuan-kerja", icon: <Building /> },
-  { name: "Kompilasi", path: "/compilation", icon: <Layers /> },
+  {
+    name: "Satuan Kerja",
+    path: "/satuan-kerja",
+    icon: <Building />,
+    adminOnly: false,
+  },
+  {
+    name: "Kompilasi",
+    path: "/compilation",
+    icon: <Layers />,
+    adminOnly: true,
+  },
   {
     name: "Manajemen Akun",
     path: "/user-management",
     icon: <UserRoundCog />,
+    adminOnly: true,
   },
 ];
 
-function Sidebar() {
+function Sidebar({ isAdmin }) {
   return (
     <div
       style={{
@@ -36,20 +47,21 @@ function Sidebar() {
           style={{ marginBottom: "2rem" }}
         ></img>
         <nav>
-          {menuItems.map((item) => (
-            <div>
-              <NavLink
-                key={item.path}
-                to={item.path}
-                className={({ isActive }) =>
-                  `sidebar-link${isActive ? " active" : ""}`
-                }
-              >
-                {item.icon}
-                {item.name}
-              </NavLink>
-            </div>
-          ))}
+          {menuItems
+            .filter((item) => isAdmin || !item.adminOnly) // show all if admin, only non-admin if not
+            .map((item) => (
+              <div key={item.path}>
+                <NavLink
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `sidebar-link${isActive ? " active" : ""}`
+                  }
+                >
+                  {item.icon}
+                  {item.name}
+                </NavLink>
+              </div>
+            ))}
         </nav>
       </div>
       <span className="logout-button">

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Table from "@/components/Table";
 import TableRow from "@/components/TableRow";
 import TablePagination from "@/components/TablePagination";
@@ -10,52 +10,57 @@ import Paper from "@/components/Paper";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Modal from "@/components/Modal";
 import CustomPDFViewer from "@/components/PDFViewer";
-import Button from "@/components/Button";
 import themeColors from "@/constants/color";
 import Input from "@/components/Input";
 import Select from "@/components/Select";
 import DatePickerInput from "@/components/DatePickerInput";
+import TableSortLabel from "@/components/TableSortLabel";
+import { buildQueryString } from "@/services/GeneralHelper";
+import moment from "moment";
+import { apiRequest } from "@/services/APIHelper";
+import { AppContext } from "@/contexts/AppContext";
 
 const columns = [
-  { key: "no", label: "No" },
-  { key: "satker", label: "Satker/Unit" },
-  { key: "no-spp", label: "No. SPP" },
-  { key: "jenisSpp", label: "Jenis SPP" },
-  { key: "tahun", label: "Tahun" },
-  { key: "tanggal-pengiriman", label: "Tanggal Pengiriman" },
+  { key: "biro_code", label: "Satker/Unit" },
+  { key: "spp_number", label: "No. SPP" },
+  { key: "type", label: "Jenis SPP", sortable: true },
+  { key: "year", label: "Tahun", sortable: true },
+  { key: "created_at", label: "Tanggal Pengiriman", sortable: true },
   { key: "uraian-spp", label: "Uraian SPP" },
-  { key: "dokumen", label: "Dokumen" },
-  { key: "keterangan", label: "Keterangan" },
+  { key: "document", label: "Dokumen" },
+  { key: "description", label: "Keterangan" },
 ];
 
-const allData = Array.from({ length: 20 }, (_, i) => ({
-  no: i + 1,
-  satker: `Biro Hukum`,
-  "no-spp": `SPP-${1000 + i}`,
-  jenisSpp: `SPP-${1000 + i}`,
-  tahun: `SPP-${202 + i}`,
-  "tanggal-pengiriman": `2025-05-${((i % 30) + 1).toString().padStart(2, "0")}`,
-  "uraian-spp": `SPP-${1000 + i}`,
-  dokumen: `Dokumen-${i + 1}.pdf`,
-  keterangan: `Keterangan untuk item ${i + 1}`,
-}));
-
 function CompilationPage() {
+  const { menuName, userData } = useContext(AppContext);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(0);
+  const [sortBy, setSortBy] = useState(null);
+  const [sortDir, setSortDir] = useState("asc");
   const [isOpenModal, setIsOpenModal] = useState(false);
-  const rowsPerPage = 10;
+  const [totalPages, setTotalPages] = useState(1);
+  const [dataTable, setDataTable] = useState([]);
+  const [pdfToOpen, setPDFtoOpen] = useState(null);
   const [filter, setFilter] = useState({
-    tahun: "",
+    year: "",
     searchKey: "",
     startDate: "",
     endDate: "",
   });
 
+  const handleSortChange = (key) => {
+    if (sortBy === key) {
+      setSortDir((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortBy(key);
+      setSortDir((prev) => (prev === "asc" ? "desc" : "asc"));
+    }
+  };
+
   const handleDateChange = (key, value) => {
     setFilter((prev) => {
       const newFilter = { ...prev, [key]: value };
 
-      // Optional auto-correction: clear endDate if it's before startDate
       if (
         key === "startDate" &&
         newFilter.endDate &&
@@ -68,12 +73,46 @@ function CompilationPage() {
     });
   };
 
-  const paginatedData = allData.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
-  );
+  const fetchTable = async () => {
+    try {
+      const query = buildQueryString({
+        biro_code: userData.code,
+        year: filter.year,
+        search_key: filter.searchKey,
+        page: page + 1,
+        per_page: rowsPerPage,
+        sort_by: sortBy,
+        sort_dir: sortDir,
+        start_date: filter.startDate
+          ? moment(filter.startDate).format("YYYY-MM-DD").toString()
+          : "",
+        end_date: filter.endDate
+          ? moment(filter.endDate).format("YYYY-MM-DD").toString()
+          : "",
+      });
+      const data = await apiRequest(`/api/archive/compilation?${query}`);
+      let result = data?.data;
+      if (data.success) {
+        setTotalPages(result?.last_page);
+        setDataTable(result?.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-  const totalPages = Math.ceil(allData.length / rowsPerPage);
+  useEffect(() => {
+    fetchTable();
+  }, [
+    filter.year,
+    filter.searchKey,
+    page + 1,
+    rowsPerPage,
+    sortBy,
+    sortDir,
+    filter.startDate,
+    filter.endDate,
+  ]);
 
   return (
     <div>
@@ -103,8 +142,8 @@ function CompilationPage() {
             name="Tahun"
             noPlaceholder
             style={{ width: "200px" }}
-            value={filter.tahun}
-            onChange={(e) => handleDateChange("tahun", e.target.value)}
+            value={filter.year}
+            onChange={(e) => handleDateChange("year", e.target.value)}
             options={[
               { label: "2020", value: "2020" },
               { label: "2021", value: "2021" },
@@ -134,47 +173,60 @@ function CompilationPage() {
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHeader>
             <TableRow>
-              {columns.map((data) => (
+              {columns.map((col) => (
                 <TableCell
+                  key={col.key}
                   component="th"
                   scope="col"
                   align="center"
-                  key={data.key}
+                  onClick={() => col.sortable && handleSortChange(col.key)}
+                  style={{ cursor: col.sortable ? "pointer" : "default" }}
                 >
-                  {data.label}
+                  {col.sortable ? (
+                    <TableSortLabel
+                      active={sortBy === col.key}
+                      direction={sortDir}
+                    >
+                      {col.label}
+                    </TableSortLabel>
+                  ) : (
+                    col.label
+                  )}
                 </TableCell>
               ))}
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paginatedData.map((row) => (
+            {dataTable.map((row) => (
               <TableRow
                 key={row.no}
                 sx={{
-                  "&:last-child td, &:last-child th": { borderBottom: "none" },
+                  "&:lastChild td, &:lastChild th": { borderBottom: "none" },
                 }}
               >
-                <TableCell component="th" scope="row" align="center">
-                  {row.no}
-                </TableCell>
-                <TableCell align="center">{row?.["satker"]}</TableCell>
-                <TableCell align="center">{row?.["tahun"]}</TableCell>
-                <TableCell align="center">{row?.["jenisSpp"]}</TableCell>
-                <TableCell align="center">{row?.["no-spp"]}</TableCell>
+                <TableCell align="center">{row?.["biro_code"]}</TableCell>
+                <TableCell align="center">{row?.["spp_number"]}</TableCell>
+                <TableCell align="center">{row?.["type"]}</TableCell>
+                <TableCell align="center">{row?.["year"]}</TableCell>
                 <TableCell align="center">
-                  {row?.["tanggal-pengiriman"]}
+                  {moment(row?.["created_at"]).format("YYYY/MM/DD")}
                 </TableCell>
                 <TableCell align="center">{row?.["uraian-spp"]}</TableCell>
                 <TableCell
                   align="center"
-                  onClick={() => setIsOpenModal(!isOpenModal)}
+                  onClick={() => {
+                    setIsOpenModal(true);
+                    setPDFtoOpen(row?.document?.url);
+                  }}
                   style={{
                     color: themeColors.primary.light,
                   }}
                 >
-                  <span style={{ cursor: "pointer" }}>{row.dokumen}</span>
+                  <span style={{ cursor: "pointer" }}>
+                    {row.document.filename}
+                  </span>
                 </TableCell>
-                <TableCell align="center">{row.keterangan}</TableCell>
+                <TableCell align="center">{row.description}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -183,11 +235,21 @@ function CompilationPage() {
           page={page}
           totalPages={totalPages}
           onPageChange={setPage}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={(value) => {
+            setRowsPerPage(value);
+            setPage(0); // reset to first page when rows per page changes
+          }}
         />
       </Paper>
       <Modal open={isOpenModal} onClose={() => setIsOpenModal(false)} title="">
+        <iframe
+          src={pdfToOpen}
+          style={{ width: "100%", height: "500px" }}
+          title="PDF Viewer"
+        />
         {/* <CustomPDFViewer pdfSource="/pdf-tester.pdf" /> */}
-        <CustomPDFViewer pdfSource="http://localhost:3000/pdf-tester.pdf" />
+        {/* <CustomPDFViewer pdfSource="http://localhost:3000/pdf-tester.pdf" /> */}
         {/* <CustomPDFViewer pdfSource="https://drive.google.com/uc?export=download&id=1a3XHkey6ROiKEBxXV1sjnPeiTbRPZfyP" /> */}
       </Modal>
     </div>

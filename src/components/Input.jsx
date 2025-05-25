@@ -54,9 +54,11 @@ function Input({
   const showFloatingLabel = isFocused || value;
 
   const containerStyle = {
-    style: style?.width ?? "100%",
+    width: style?.width ?? "100%",
     display: "flex",
+    flexDirection: "column",
     position: "relative",
+    ...style,
   };
 
   const labelStyle = {
@@ -83,9 +85,9 @@ function Input({
   };
 
   const inputStyle = {
-    ...style,
-    width: "100%",
-    padding: "0.75rem",
+    // ...style,
+    // width: "100%",
+    padding: "0.75rem ",
     fontSize: "1rem",
     border: "1px solid #ccc",
     borderRadius: "4px",
@@ -114,6 +116,10 @@ function Input({
         onBlur={handleBlur}
         style={inputStyle}
       />
+      {(helperText || localError) && (
+        <div style={helperTextStyle}>{localError || helperText}</div>
+      )}
+
       {isPassword && (
         <button
           type="button"
@@ -123,9 +129,6 @@ function Input({
         >
           {showPassword ? <EyeClosed size={18} /> : <Eye size={18} />}
         </button>
-      )}
-      {(helperText || localError) && (
-        <div style={helperTextStyle}>{localError || helperText}</div>
       )}
     </div>
   );

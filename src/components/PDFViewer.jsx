@@ -9,6 +9,8 @@ import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
 
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import "@react-pdf-viewer/default-layout/lib/styles/index.css";
+import { fetchPDFAsBlob } from "@/pages/ListSatuankerja/satkerHooks";
+import { toast } from "react-toastify";
 
 const CustomPDFViewer = ({ pdfSource }) => {
   const [processedUrl, setProcessedUrl] = useState("");
@@ -32,6 +34,22 @@ const CustomPDFViewer = ({ pdfSource }) => {
       const url = URL.createObjectURL(pdfSource);
       setProcessedUrl(url);
       return () => URL.revokeObjectURL(url);
+    }
+  }, [pdfSource]);
+
+  useEffect(() => {
+    const loadPDF = async () => {
+      try {
+        const blob = await fetchPDFAsBlob(pdfSource);
+        const url = URL.createObjectURL(blob);
+        console.log("urls", url);
+      } catch (err) {
+        toast.error("Gagal memuat dokumen PDF");
+      }
+    };
+
+    if (typeof pdfSource === "string" && pdfSource.includes("rokeubmn-pa.id")) {
+      loadPDF();
     }
   }, [pdfSource]);
 

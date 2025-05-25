@@ -41,6 +41,29 @@ export const validationSchema = {
   },
 };
 
+export function formatUrlPathToTitle(url) {
+  if (!url) return "";
+
+  const segments = url.split("/");
+  const lastSegment = segments[segments.length - 1];
+
+  const abbreviationMap = {
+    spp: "SPP",
+  };
+
+  const formatted = lastSegment
+    .split("-")
+    .map((word) => {
+      if (abbreviationMap[word.toLowerCase()]) {
+        return abbreviationMap[word.toLowerCase()];
+      }
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(" ");
+
+  return formatted;
+}
+
 export const combineValidators =
   (...fns) =>
   (val) => {
@@ -50,3 +73,30 @@ export const combineValidators =
     }
     return "";
   };
+
+export const buildQueryString = (params = {}) => {
+  const query = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      query.append(key, value);
+    }
+  });
+
+  return query.toString(); // returns a=b&c=d
+};
+
+export function filterDataByCode(dataArray, targetCode) {
+  // Validate that dataArray is actually an array
+  if (!Array.isArray(dataArray)) {
+    throw new Error("First argument must be an array.");
+  }
+
+  // Validate that targetCode is a number
+  if (typeof targetCode !== "number") {
+    throw new Error("Target code must be a number.");
+  }
+
+  // Filter and return items where item's code exactly equals the targetCode
+  return dataArray.filter((item) => item.code === targetCode);
+}

@@ -29,7 +29,6 @@ const Breadcrumbs = ({ items }) => {
       {items.map((item, index) => {
         const isLast = index === items.length - 1;
         const active = isActivePath(item.path);
-        console.log(item.path, active, location.pathname);
 
         return (
           <div

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import Table from "@/components/Table";
 import TableRow from "@/components/TableRow";
 import TablePagination from "@/components/TablePagination";
@@ -15,62 +15,54 @@ import Textarea from "@/components/TextArea";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { Plus, Settings } from "lucide-react";
 import FileInput from "@/components/FileInput";
-import { validationSchema } from "@/services/GeneralHelper";
+import {
+  buildQueryString,
+  formatUrlPathToTitle,
+  validationSchema,
+} from "@/services/GeneralHelper";
 import { toast } from "react-toastify";
 import DatePickerInput from "@/components/DatePickerInput";
 import CustomPDFViewer from "@/components/PDFViewer";
 import themeColors from "@/constants/color";
 import TableSortLabel from "@/components/TableSortLabel";
-
-const columns = [
-  { key: "no", label: "No" },
-  { key: "no-spp", label: "No. SPP" },
-  { key: "tanggal-pengiriman", label: "Tanggal Pengiriman", sortable: true },
-  { key: "jenisSpp", label: "Jenis SPP", sortable: true },
-  { key: "tahun", label: "Tahun", sortable: true },
-  { key: "dokumen", label: "Dokumen" },
-  { key: "keterangan", label: "Keterangan" },
-  { key: "action", label: "Action" },
-];
-
-const allData = Array.from({ length: 20 }, (_, i) => ({
-  no: i + 1,
-  "no-spp": `SPP-${1000 + i}`,
-  tahun: `2025`,
-  "tanggal-pengiriman": `2025-05-${((i % 30) + 1).toString().padStart(2, "0")}`,
-  jenisSpp: ["GUP", "TUP"][Math.floor(Math.random() * 2)],
-  dokumen: `Dokumen-${i + 1}.pdf`,
-  keterangan: `Keterangan untuk item ${i + 1}`,
-}));
+import { AppContext } from "@/contexts/AppContext";
+import { apiRequest } from "@/services/APIHelper";
+import { useLocation } from "react-router-dom";
+import moment from "moment";
+import {
+  allData,
+  columns,
+  fetchPDFAsBlob,
+  fileToBase64,
+} from "@/pages/ListSatuankerja/satkerHooks";
 
 function ListSatuanKerjaPage() {
+  const { menuName, userData } = useContext(AppContext);
+  const location = useLocation();
+  const menuTitle = formatUrlPathToTitle(location.pathname);
   const [filter, setFilter] = useState({
     tahun: "",
     searchKey: "",
-    startDate: "",
-    endDate: "",
+    startDate: null,
+    endDate: null,
   });
   const [isOpenPDF, setIsOpenPDF] = useState(false);
   const [variantModal, setVariantModal] = useState("");
-  const [sortBy, setSortBy] = useState(null); // e.g., "name"
+  const [sortBy, setSortBy] = useState(null);
   const [sortDir, setSortDir] = useState("asc");
   const [page, setPage] = useState(0);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
   const [formData, setFormData] = useState({
-    "no-spp": "",
+    no_spp: "",
     tahun: "",
-    jenisSpp: "",
+    type: "",
     dokumen: null,
     keterangan: "",
   });
-
-  const sortedRows = [...allData].sort((a, b) => {
-    if (!sortBy) return 0;
-    if (a[sortBy] < b[sortBy]) return sortDir === "asc" ? -1 : 1;
-    if (a[sortBy] > b[sortBy]) return sortDir === "asc" ? 1 : -1;
-    return 0;
-  });
+  const [dataTable, setDataTable] = useState([]);
+  const [pdfToOpen, setPDFtoOpen] = useState("");
 
   const handleSortChange = (key) => {
     if (sortBy === key) {
@@ -84,8 +76,6 @@ function ListSatuanKerjaPage() {
   const handleDateChange = (key, value) => {
     setFilter((prev) => {
       const newFilter = { ...prev, [key]: value };
-
-      // Optional auto-correction: clear endDate if it's before startDate
       if (
         key === "startDate" &&
         newFilter.endDate &&
@@ -100,23 +90,81 @@ function ListSatuanKerjaPage() {
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    console.log(name, value, files);
     setFormData((prev) => ({
       ...prev,
       [name]: files ? files[0] : value,
     }));
   };
 
+  const fetchTable = async () => {
+    try {
+      const query = buildQueryString({
+        biro_code: userData.code,
+        tahun: filter.tahun,
+        search_key: filter.searchKey,
+        page: page + 1,
+        per_page: rowsPerPage,
+        sort_by: sortBy,
+        sort_dir: sortDir,
+        start_date: filter.startDate
+          ? moment(filter.startDate).format("YYYY-MM-DD").toString()
+          : "",
+        end_date: filter.endDate
+          ? moment(filter.endDate).format("YYYY-MM-DD").toString()
+          : "",
+      });
+      const data = await apiRequest(`/api/archive/list?${query}`);
+      let result = data.data;
+      if (data.success) {
+        setTotalPages(result?.last_page);
+        setDataTable(result?.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const submitData = async (formData) => {
+    try {
+      const base64Dokumen = await fileToBase64(formData.dokumen);
+      const payload = {
+        no_spp: formData?.no_spp,
+        jenis_spp: formData?.type,
+        tahun: formData?.tahun,
+        keterangan: formData?.keterangan,
+        kode_biro: userData?.biro_code,
+        dokumen: base64Dokumen,
+      };
+      const result = await apiRequest("/api/archive/create", "POST", {
+        body: payload,
+      });
+      console.log("formDatass", result);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTable();
+  }, [
+    filter.tahun,
+    filter.searchKey,
+    page + 1,
+    rowsPerPage,
+    sortBy,
+    sortDir,
+    filter.startDate,
+    filter.endDate,
+  ]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      console.log("Submitted:", formData);
-
       if (
-        !formData?.["no-spp"] ||
+        !formData?.["no_spp"] ||
         !formData.tahun ||
-        !formData.jenisSpp ||
+        !formData.type ||
         !formData.dokumen ||
         !formData.keterangan
       ) {
@@ -124,38 +172,36 @@ function ListSatuanKerjaPage() {
         return;
       }
 
+      submitData(formData);
+      console.log("Submitted:", formData);
+
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       toast.success("Data berhasil disimpan!");
       setIsOpenModal(false);
       setFormData({
-        "no-spp": "",
+        no_spp: "",
         tahun: "",
-        jenisSpp: "",
+        type: "",
         dokumen: null,
         keterangan: "",
       });
+      fetchTable();
     } catch (err) {
       console.error(err);
       toast.error("Gagal menyimpan data. Silakan coba lagi.");
     }
   };
-  const paginatedData = sortedRows.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
-  );
-
-  const totalPages = Math.ceil(allData.length / rowsPerPage);
 
   return (
     <div>
       <Breadcrumbs
         items={[
           { name: "Satuan Kerja", path: "/satuan-kerja" },
-          { name: "Biro Hukum", path: "/satuan-kerja/biro-hukum" },
+          { name: menuName.name },
         ]}
       />
-      <Title>Biro Hukum</Title>
+      <Title>{menuName.name || menuTitle}</Title>
       <Paper
         elevation={3}
         style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
@@ -179,7 +225,7 @@ function ListSatuanKerjaPage() {
           </Button>
           <div
             style={{
-              width: "calc(100vw/2.5)",
+              width: "calc(100vw/2.2)",
               display: "flex",
               gap: 10,
             }}
@@ -252,31 +298,31 @@ function ListSatuanKerjaPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paginatedData.map((row) => (
+            {dataTable.map((row, index) => (
               <TableRow
-                key={row.no}
+                key={index + 1}
                 sx={{
-                  "&:last-child td, &:last-child th": { borderBottom: "none" },
+                  "&:lastChild td, &:lastChild th": { borderBottom: "none" },
                 }}
               >
-                <TableCell component="th" scope="row" align="center">
-                  {row.no}
-                </TableCell>
-                <TableCell align="center">{row?.["no-spp"]}</TableCell>
+                <TableCell align="center">{row?.["no_spp"]}</TableCell>
                 <TableCell align="center">
-                  {row?.["tanggal-pengiriman"]}
+                  {moment(row?.["created_at"]).format("YYYY/MM/DD")}
                 </TableCell>
-                <TableCell align="center">{row.jenisSpp}</TableCell>
+                <TableCell align="center">{row.jenis_spp}</TableCell>
                 <TableCell align="center">{row.tahun}</TableCell>
                 <TableCell
                   align="center"
-                  onClick={() => setIsOpenPDF(true)}
+                  onClick={() => {
+                    setIsOpenPDF(true);
+                    setPDFtoOpen(row.document?.url);
+                  }}
                   style={{
                     color: themeColors.primary.light,
                     cursor: "pointer",
                   }}
                 >
-                  {row.dokumen}
+                  {row.document?.filename}
                 </TableCell>
                 <TableCell align="center">{row.keterangan}</TableCell>
                 <TableCell align="center">
@@ -312,9 +358,9 @@ function ListSatuanKerjaPage() {
           setIsOpenModal(false);
           setVariantModal("");
           setFormData({
-            "no-spp": "",
+            no_spp: "",
             tahun: "",
-            jenisSpp: "",
+            type: "",
             dokumen: null,
             keterangan: "",
           });
@@ -332,8 +378,8 @@ function ListSatuanKerjaPage() {
         >
           <Input
             label="No. SPP"
-            name="no-spp"
-            value={formData?.["no-spp"]}
+            name="no_spp"
+            value={formData?.["no_spp"]}
             onChange={handleChange}
             validate={validationSchema.onlyNumber}
             required
@@ -344,14 +390,14 @@ function ListSatuanKerjaPage() {
             name="tahun"
             value={formData.tahun}
             onChange={handleChange}
-            validate={validationSchema.year}
+            validate={validationSchema.tahun}
             required
             placeholder="Masukkan tahun"
           />
           <Select
             label="Jenis SPP"
-            name="jenisSpp"
-            value={formData.jenisSpp}
+            name="type"
+            value={formData.type}
             onChange={handleChange}
             required
             options={[
@@ -382,8 +428,18 @@ function ListSatuanKerjaPage() {
       </Modal>
       <Modal open={isOpenPDF} onClose={() => setIsOpenPDF(false)} title="">
         {/* <CustomPDFViewer pdfSource="/pdf-tester.pdf" /> */}
-        <CustomPDFViewer pdfSource="http://localhost:3000/pdf-tester.pdf" />
-        {/* <CustomPDFViewer pdfSource="https://drive.google.com/uc?export=download&id=1a3XHkey6ROiKEBxXV1sjnPeiTbRPZfyP" /> */}
+        {/* <CustomPDFViewer pdfSource={pdfToOpen} /> */}
+        {/* <CustomPDFViewer pdfSource="https://api.rokeubmn-pa.id/storage/documents/BrQcOw5eryN4Y8q2CRHWtBZ1gDreuhdAXXoBenI8.pdf" /> */}
+        {/* <iframe
+          src={`https://api.rokeubmn-pa.id/storage/documents/BrQcOw5eryN4Y8q2CRHWtBZ1gDreuhdAXXoBenI8.pdf`}
+          style={{ width: "100%", height: "500px" }}
+          title="PDF Viewer"
+        /> */}
+        <iframe
+          src={pdfToOpen}
+          style={{ width: "100%", height: "500px" }}
+          title="PDF Viewer"
+        />
       </Modal>
     </div>
   );
