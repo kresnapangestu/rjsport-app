@@ -8,8 +8,6 @@ import Input from "../components/Input";
 import { validationSchema } from "../services/GeneralHelper";
 
 function LoginPage() {
-  const [satker, setSatker] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -32,15 +30,24 @@ function LoginPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
+
+    var CryptoJS = require("crypto-js");
+    var encryptedPass = CryptoJS.AES.encrypt(formData.password, 'YzDWFXF8LmfUMdOn0RtZ0rYC90zF5wpoz87oCk').toString();
+
     try {
-      const userData = await fetchHelper(
-        "https://api.rokeubmn-pa.id/auth/login",
+      const response = await fetchHelper(
+        "https://api.rokeubmn-pa.id/api/auth/login",
         "POST",
-        { biro_code: satker, password }
+        { kode_biro: parseInt(formData.satker), password: encryptedPass }
       );
-      //   const userData = await fakeLogin(email, password);
-      login(userData);
-      navigate("/dashboard");
+
+      // console.log(response)
+      if (response?.success) {
+        localStorage.setItem("token", response?.data?.access_token);
+        navigate("/satuan-kerja");
+      } else {
+        setError(response?.message);
+      }
     } catch (err) {
       setError(err);
     } finally {

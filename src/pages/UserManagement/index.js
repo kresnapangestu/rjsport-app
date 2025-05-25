@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useEffect, useState } from "react";
 import Table from "@/components/Table";
 import TableRow from "@/components/TableRow";
 import TablePagination from "@/components/TablePagination";
@@ -11,14 +12,13 @@ import Button from "@/components/Button";
 import Modal from "@/components/Modal";
 import Select from "@/components/Select";
 import Input from "@/components/Input";
-import Textarea from "@/components/TextArea";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { Plus, Settings, Trash2, UserRoundSearch } from "lucide-react";
-import FileInput from "@/components/FileInput";
 import { validationSchema } from "@/services/GeneralHelper";
 import { toast } from "react-toastify";
 import Chip from "@/components/Chip";
 import Dialog from "@/components/Dialog";
+import { fetchHelperGET } from "@/services/FetchHelper";
 
 const columns = [
   { key: "no", label: "No" },
@@ -28,21 +28,36 @@ const columns = [
   { key: "action", label: "Action" },
 ];
 
-const allData = Array.from({ length: 20 }, (_, i) => ({
-  no: i + 1,
-  "biro-code": `XX-${1000 + i}`,
-  "biro-name": `Biro Hukum ${i + 1}`,
-  password: ["Admin1", "Pengguna2"][Math.floor(Math.random() * 2)],
-  privilege: ["Admin", "Pengguna"][Math.floor(Math.random() * 2)],
-}));
+const mapTableData = (data) => {
+  let arr = []
+  data.forEach((item, i) => {
+    arr.push({
+      no: i + 1,
+      "biro-code": item.biro_code,
+      "biro-name": item.name,
+      // password: ["Admin1", "Pengguna2"][Math.floor(Math.random() * 2)],
+      privilege: item.role
+    })
+  })
+
+  return arr;
+}
 
 function UserManagementPage() {
+  
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(0);
+  const [totalPage, setTotalPage] = useState(1);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [variantModal, setVariantModal] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
+
+  const [searchKey, setSearchKey] = useState("");
+  const [tableData, setTableData] = useState();
   const [focusedData, setFocusedData] = useState(null);
-  const rowsPerPage = 10;
+
   const [formData, setFormData] = useState({
     kodeBiro: "",
     name: "",
@@ -87,12 +102,39 @@ function UserManagementPage() {
       toast.error("Gagal menambahkan pengguna. Silakan coba lagi.");
     }
   };
-  const paginatedData = allData.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
-  );
 
-  const totalPages = Math.ceil(allData.length / rowsPerPage);
+  const getListUser = async () => {
+    setError("");
+    setLoading(true);
+
+
+    let urlPath = `https://api.rokeubmn-pa.id/api/user/list?page=${page + 1}&per_page=${rowsPerPage}`;
+    if (searchKey) {
+      urlPath += `&search=${searchKey}`
+    }
+    try {
+      const response = await fetchHelperGET(
+        urlPath,
+        "GET",
+        localStorage.getItem("token")
+      );
+
+      if (response?.success) {
+        console.log("USER: ", response)
+        setTableData(mapTableData(response?.data?.data));
+        setTotalPage(response?.data?.last_page)
+      }
+    } catch (err) {
+      console.error("Fetch error:", err); // Add this
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getListUser();
+  }, [page, rowsPerPage, searchKey])
 
   return (
     <div>
@@ -126,8 +168,8 @@ function UserManagementPage() {
               label="Search"
               style={{ width: "200px" }}
               name="Search"
-              // value={filter.searchKey}
-              // onChange={(e) => handleDateChange("searchKey", e.target.value)}
+              value={searchKey}
+              onChange={(e) => setSearchKey(e.target.value)}
             />
           </div>
         </div>
@@ -147,7 +189,7 @@ function UserManagementPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paginatedData.map((row) => (
+            {tableData?.map((row) => (
               <TableRow
                 key={row.no}
                 sx={{
@@ -166,9 +208,9 @@ function UserManagementPage() {
                     label={row?.["privilege"]}
                     style={{
                       backgroundColor:
-                        row?.["privilege"] === "Admin" ? "#FEDCE1" : "#E7FEE7",
+                        row?.["privilege"] === "admin" ? "#FEDCE1" : "#E7FEE7",
                       color:
-                        row?.["privilege"] === "Admin" ? "#F9203E" : "#06BC09",
+                        row?.["privilege"] === "admin" ? "#F9203E" : "#06BC09",
                     }}
                   />{" "}
                 </TableCell>
@@ -213,8 +255,10 @@ function UserManagementPage() {
         </Table>
         <TablePagination
           page={page}
-          totalPages={totalPages}
+          totalPages={totalPage}
           onPageChange={setPage}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={(e) => setRowsPerPage(e)}
         />
       </Paper>
       <Modal
@@ -286,14 +330,16 @@ function UserManagementPage() {
             onChange={handleChange}
             required
             options={[
-              { label: "Admin", value: "Admin" },
-              { label: "Supervisor", value: "Supervisor" },
-              { label: "Pengguna", value: "Pengguna" },
+              { label: "admin", value: "admin" },
+              { label: "supervisor", value: "supervisor" },
+              { label: "pengguna", value: "pengguna" },
             ]}
           />
-          <Button type="submit" style={{ float: "right" }}>
-            Tambahkan
-          </Button>
+          {(variantModal === "Add") &&
+            <Button type="submit" style={{ float: "right" }}>
+              Tambahkan
+            </Button>
+          }
         </form>
       </Modal>
       <Dialog
