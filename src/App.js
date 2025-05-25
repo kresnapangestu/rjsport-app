@@ -17,23 +17,7 @@ import { AppContext } from "./contexts/AppContext";
 
 function App() {
   const { user } = useAuth();
-  const { setUserData, isAdmin } = useContext(AppContext);
-
-  console.log("asdasd");
-
-  useEffect(() => {
-    console.log("asdasd", "asdasdasd");
-    const loadUser = async () => {
-      try {
-        const userData = await fetchUser();
-        setUserData(userData.data);
-      } catch (error) {
-        console.error("Error loading menu:", error);
-      }
-    };
-
-    loadUser();
-  }, [setUserData]);
+  const { isAdmin } = useContext(AppContext);
 
   return (
     <>
