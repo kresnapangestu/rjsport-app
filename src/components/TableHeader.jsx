@@ -1,5 +1,4 @@
-import React, { Children } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import React from "react";
 
 function TableHeader({ children }) {
   const headerStyle = {

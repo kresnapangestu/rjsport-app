@@ -8,7 +8,7 @@ export const validationSchema = {
 
   onlyNumber: (val) => (/^\d+$/.test(val) ? "" : "Hanya boleh angka"),
 
-  year: (val) => {
+  tahun: (val) => {
     if (!/^\d{4}$/.test(val)) return "Format tahun harus 4 digit";
     const year = parseInt(val, 10);
     const currentYear = new Date().getFullYear();
@@ -100,3 +100,24 @@ export function filterDataByCode(dataArray, targetCode) {
   // Filter and return items where item's code exactly equals the targetCode
   return dataArray.filter((item) => item.code === targetCode);
 }
+
+export const isAuthorizedRoute = (pathname, userData, menus = []) => {
+  const isAdmin = userData?.role === "admin";
+
+  // 1. Admin bisa akses semua
+  if (isAdmin) return true;
+
+  // 2. User bisa akses /satuan-kerja
+  if (pathname === "/") return true;
+  if (pathname === "/satuan-kerja") return true;
+
+  // 3. Hanya admin yang bisa akses /compilation dan /user-management
+  if (pathname === "/compilation" || pathname === "/user-management")
+    return false;
+
+  // 4. Validasi berdasarkan listMenu dan biro_code
+  const matched = menus.find((menu) => menu.path === pathname);
+  if (!matched) return false;
+
+  return matched.code === userData?.biro_code;
+};

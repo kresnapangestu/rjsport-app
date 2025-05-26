@@ -45,9 +45,7 @@ function DatePickerInput({
   const containerStyle = {
     display: "flex",
     flexDirection: "column",
-    flex: 1,
     position: "relative",
-    // width: "100%",
   };
 
   const labelStyle = {

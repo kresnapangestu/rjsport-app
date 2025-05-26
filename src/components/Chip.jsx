@@ -4,7 +4,7 @@ import { X } from "lucide-react";
 function Chip({
   label,
   onDelete,
-  variant = "filled",
+  // variant = "filled",
   className = "",
   style = {},
 }) {

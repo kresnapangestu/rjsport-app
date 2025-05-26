@@ -14,9 +14,11 @@ function FileInput({
   style = {},
   helperText = "",
   validate,
+  value = null,
 }) {
   const [loading, setLoading] = useState(false);
   const [localError, setLocalError] = useState("");
+  const [isFilled, setIsFilled] = useState(value ? true : false);
 
   const runValidation = (val) => {
     const validators = [];
@@ -34,6 +36,7 @@ function FileInput({
 
   const handleChange = async (e) => {
     const file = e.target.files[0];
+    setIsFilled(true);
     onChange(e); // propagate the event first
 
     const errorMessage = runValidation(file?.name);
@@ -45,7 +48,6 @@ function FileInput({
       setLoading(true);
       toast.info("Uploading file...");
 
-      // simulate upload with timeout
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       toast.success("File uploaded successfully!");
@@ -53,6 +55,7 @@ function FileInput({
       console.error(err);
       toast.error("Failed to upload file.");
     } finally {
+      setIsFilled(false);
       setLoading(false);
     }
   };
@@ -87,6 +90,18 @@ function FileInput({
       <label htmlFor={name} style={labelStyle}>
         {label}
       </label>
+      {value && isFilled && (
+        <div style={{ marginBottom: "0.5rem" }}>
+          <a
+            href={value.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "blue", textDecoration: "underline" }}
+          >
+            {value.filename}
+          </a>
+        </div>
+      )}
       <input
         id={name}
         type="file"

@@ -5,7 +5,7 @@ import { AppContext } from "@/contexts/AppContext";
 import { fetchMenu } from "./menuHooks";
 
 function MenuPage() {
-  const { handleChangeMenu, setListMenu, listMenu, userData, isAdmin } =
+  const { handleChangeMenu, listMenu, setListMenu, userData, isAdmin } =
     useContext(AppContext);
 
   useEffect(() => {

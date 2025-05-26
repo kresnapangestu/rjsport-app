@@ -9,13 +9,12 @@ import Title from "@/components/Title";
 import Paper from "@/components/Paper";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Modal from "@/components/Modal";
-import CustomPDFViewer from "@/components/PDFViewer";
 import themeColors from "@/constants/color";
 import Input from "@/components/Input";
 import Select from "@/components/Select";
 import DatePickerInput from "@/components/DatePickerInput";
 import TableSortLabel from "@/components/TableSortLabel";
-import { buildQueryString } from "@/services/GeneralHelper";
+import { buildQueryString, validationSchema } from "@/services/GeneralHelper";
 import moment from "moment";
 import { apiRequest } from "@/services/APIHelper";
 import { AppContext } from "@/contexts/AppContext";
@@ -32,7 +31,7 @@ const columns = [
 ];
 
 function CompilationPage() {
-  const { menuName, userData } = useContext(AppContext);
+  const { userData } = useContext(AppContext);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(0);
   const [sortBy, setSortBy] = useState(null);
@@ -76,7 +75,7 @@ function CompilationPage() {
   const fetchTable = async () => {
     try {
       const query = buildQueryString({
-        biro_code: userData.code,
+        biro_code: userData?.biro_code,
         year: filter.year,
         search_key: filter.searchKey,
         page: page + 1,
@@ -90,7 +89,9 @@ function CompilationPage() {
           ? moment(filter.endDate).format("YYYY-MM-DD").toString()
           : "",
       });
-      const data = await apiRequest(`/api/archive/compilation?${query}`);
+      const data = await apiRequest({
+        url: `/api/archive/compilation?${query}`,
+      });
       let result = data?.data;
       if (data.success) {
         setTotalPages(result?.last_page);
@@ -137,20 +138,13 @@ function CompilationPage() {
             value={filter.searchKey}
             onChange={(e) => handleDateChange("searchKey", e.target.value)}
           />
-          <Select
+          <Input
             label="Tahun"
-            name="Tahun"
-            noPlaceholder
             style={{ width: "200px" }}
+            name="Tahun"
             value={filter.year}
+            validate={validationSchema.tahun}
             onChange={(e) => handleDateChange("year", e.target.value)}
-            options={[
-              { label: "2020", value: "2020" },
-              { label: "2021", value: "2021" },
-              { label: "2022", value: "2022" },
-              { label: "2024", value: "2024" },
-              { label: "2025", value: "2025" },
-            ]}
           />
           <DatePickerInput
             label="Start Date"

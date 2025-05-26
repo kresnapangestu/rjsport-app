@@ -1,7 +1,6 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
-import { useAuth } from "./contexts/AuthContexts";
 import AppLayout from "./Layouts/AppLayout";
 import ListSatuanKerjaPage from "./pages/ListSatuankerja";
 import { ToastContainer } from "react-toastify";
@@ -11,13 +10,13 @@ import "react-toastify/dist/ReactToastify.css";
 import "react-datepicker/dist/react-datepicker.css";
 import UserManagementPage from "./pages/UserManagement";
 import MenuPage from "./pages/Menu";
-import { fetchUser } from "./pages/Menu/menuHooks";
 import { AppContext } from "./contexts/AppContext";
+import PrivateRoute from "./components/PrivateRoute";
 // import "@/PDFWorkerSetup";
 
 function App() {
-  const { user } = useAuth();
-  const { isAdmin } = useContext(AppContext);
+  const { isAdmin, listMenu, userData } = useContext(AppContext);
+  const token = localStorage.getItem("token");
 
   return (
     <>
@@ -25,94 +24,49 @@ function App() {
       <Routes>
         <Route
           path="/"
-          element={user ? <Navigate to="/satuan-kerja" /> : <LoginPage />}
+          element={token ? <Navigate to="/satuan-kerja" /> : <LoginPage />}
         />
         <Route
           path="/satuan-kerja"
           element={
-            <AppLayout isAdmin={isAdmin}>
-              <MenuPage />
-            </AppLayout>
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin}>
+                <MenuPage />
+              </AppLayout>
+            </PrivateRoute>
           }
         />
-        <Route
-          path="/satuan-kerja/biro-hukum"
-          element={
-            <AppLayout isAdmin={isAdmin}>
-              <ListSatuanKerjaPage />
-            </AppLayout>
-          }
-        />
-        <Route
-          path="/satuan-kerja/biro-keuangan"
-          element={
-            <AppLayout isAdmin={isAdmin}>
-              <ListSatuanKerjaPage />
-            </AppLayout>
-          }
-        />
-        <Route
-          path="/satuan-kerja/biro-osdma"
-          element={
-            <AppLayout isAdmin={isAdmin}>
-              <ListSatuanKerjaPage />
-            </AppLayout>
-          }
-        />
-        <Route
-          path="/satuan-kerja/biro-perencanaan"
-          element={
-            <AppLayout isAdmin={isAdmin}>
-              <ListSatuanKerjaPage />
-            </AppLayout>
-          }
-        />
-        <Route
-          path="/satuan-kerja/biro-umum"
-          element={
-            <AppLayout isAdmin={isAdmin}>
-              <ListSatuanKerjaPage />
-            </AppLayout>
-          }
-        />
-        <Route
-          path="/satuan-kerja/biro-humas"
-          element={
-            <AppLayout isAdmin={isAdmin}>
-              <ListSatuanKerjaPage />
-            </AppLayout>
-          }
-        />
-        <Route
-          path="/satuan-kerja/biro-ppsdm"
-          element={
-            <AppLayout isAdmin={isAdmin}>
-              <ListSatuanKerjaPage />
-            </AppLayout>
-          }
-        />
-        <Route
-          path="/satuan-kerja/biro-poltek"
-          element={
-            <AppLayout isAdmin={isAdmin}>
-              <ListSatuanKerjaPage />
-            </AppLayout>
-          }
-        />
+        {listMenu.map((data) => (
+          <Route
+            key={data?.id}
+            path={`${data?.path}`}
+            element={
+              <PrivateRoute>
+                <AppLayout isAdmin={isAdmin}>
+                  <ListSatuanKerjaPage />
+                </AppLayout>
+              </PrivateRoute>
+            }
+          />
+        ))}
         <Route
           path="/compilation"
           element={
-            <AppLayout isAdmin={isAdmin}>
-              <CompilationPage />
-            </AppLayout>
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin}>
+                <CompilationPage />
+              </AppLayout>
+            </PrivateRoute>
           }
         />
         <Route
           path="/user-management"
           element={
-            <AppLayout isAdmin={isAdmin}>
-              <UserManagementPage />
-            </AppLayout>
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin}>
+                <UserManagementPage />
+              </AppLayout>
+            </PrivateRoute>
           }
         />
       </Routes>

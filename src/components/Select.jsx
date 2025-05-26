@@ -19,7 +19,7 @@ function Select({
   required = false,
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isFocused, setFocused] = useState(false);
+  const isFocused = false;
 
   const [localError, setLocalError] = useState("");
 
@@ -61,7 +61,7 @@ function Select({
     width: style?.width || "100%",
   };
 
-  const showFloatingLabel = isFocused || value;
+  const showFloatingLabel = value;
 
   const labelStyle = {
     position: "absolute",

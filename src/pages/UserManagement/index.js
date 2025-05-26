@@ -21,7 +21,6 @@ import Dialog from "@/components/Dialog";
 import { fetchHelperGET } from "@/services/FetchHelper";
 
 const columns = [
-  { key: "no", label: "No" },
   { key: "biro-code", label: "Kode Biro" },
   { key: "biro-name", label: "Nama Biro" },
   { key: "privilege", label: "Tipe Akses" },
@@ -29,27 +28,23 @@ const columns = [
 ];
 
 const mapTableData = (data) => {
-  let arr = []
+  let arr = [];
   data.forEach((item, i) => {
     arr.push({
-      no: i + 1,
       "biro-code": item.biro_code,
       "biro-name": item.name,
       // password: ["Admin1", "Pengguna2"][Math.floor(Math.random() * 2)],
-      privilege: item.role
-    })
-  })
+      privilege: item.role,
+    });
+  });
 
   return arr;
-}
+};
 
 function UserManagementPage() {
-  
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(0);
   const [totalPage, setTotalPage] = useState(1);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [variantModal, setVariantModal] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
@@ -104,13 +99,11 @@ function UserManagementPage() {
   };
 
   const getListUser = async () => {
-    setError("");
-    setLoading(true);
-
-
-    let urlPath = `https://api.rokeubmn-pa.id/api/user/list?page=${page + 1}&per_page=${rowsPerPage}`;
+    let urlPath = `https://api.rokeubmn-pa.id/api/user/list?page=${
+      page + 1
+    }&per_page=${rowsPerPage}`;
     if (searchKey) {
-      urlPath += `&search=${searchKey}`
+      urlPath += `&search=${searchKey}`;
     }
     try {
       const response = await fetchHelperGET(
@@ -120,21 +113,19 @@ function UserManagementPage() {
       );
 
       if (response?.success) {
-        console.log("USER: ", response)
         setTableData(mapTableData(response?.data?.data));
-        setTotalPage(response?.data?.last_page)
+        setTotalPage(response?.data?.last_page);
       }
     } catch (err) {
       console.error("Fetch error:", err); // Add this
-      setError(err);
+      toast.error(err);
     } finally {
-      setLoading(false);
     }
   };
 
   useEffect(() => {
     getListUser();
-  }, [page, rowsPerPage, searchKey])
+  }, [page, rowsPerPage, searchKey]);
 
   return (
     <div>
@@ -197,15 +188,12 @@ function UserManagementPage() {
                 }}
               >
                 <TableCell component="th" scope="row" align="center">
-                  {row?.no}
-                </TableCell>
-                <TableCell component="th" scope="row" align="center">
                   {row?.["biro-code"]}
                 </TableCell>
                 <TableCell align="center">{row?.["biro-name"]}</TableCell>
                 <TableCell align="center">
                   <Chip
-                    label={row?.["privilege"]}
+                    label={row?.["privilege"]?.toUpperCase()}
                     style={{
                       backgroundColor:
                         row?.["privilege"] === "admin" ? "#FEDCE1" : "#E7FEE7",
@@ -335,11 +323,11 @@ function UserManagementPage() {
               { label: "pengguna", value: "pengguna" },
             ]}
           />
-          {(variantModal === "Add") &&
+          {variantModal === "Add" && (
             <Button type="submit" style={{ float: "right" }}>
               Tambahkan
             </Button>
-          }
+          )}
         </form>
       </Modal>
       <Dialog

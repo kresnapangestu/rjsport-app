@@ -6,10 +6,9 @@ import { useAuth } from "../contexts/AuthContexts";
 import Button from "../components/Button";
 import Input from "../components/Input";
 import { validationSchema } from "../services/GeneralHelper";
+import { toast } from "react-toastify";
 
 function LoginPage() {
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -28,8 +27,6 @@ function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
 
     var CryptoJS = require("crypto-js");
     var encryptedPass = CryptoJS.AES.encrypt(
@@ -43,17 +40,16 @@ function LoginPage() {
         "POST",
         { kode_biro: parseInt(formData.satker), password: encryptedPass }
       );
-      // console.log(response)
+
       if (response?.success) {
-        localStorage.setItem("token", response?.data?.access_token);
+        login(response?.data?.access_token);
         navigate("/satuan-kerja");
       } else {
-        setError(response?.message);
+        toast.error(response?.message);
       }
     } catch (err) {
-      setError(err);
+      toast.error(err);
     } finally {
-      setLoading(false);
     }
   };
 

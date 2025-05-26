@@ -20,7 +20,7 @@ const CustomPDFViewer = ({ pdfSource }) => {
     const processUrl = (url) => {
       // Handle Google Drive URLs
       if (url.includes("drive.google.com")) {
-        const fileId = url.match(/\/file\/d\/([^\/]+)/)?.[1];
+        const fileId = url.match(/filed([^]+)/)?.[1];
         if (fileId) {
           return `https://drive.google.com/uc?export=download&id=${fileId}`;
         }
@@ -42,7 +42,6 @@ const CustomPDFViewer = ({ pdfSource }) => {
       try {
         const blob = await fetchPDFAsBlob(pdfSource);
         const url = URL.createObjectURL(blob);
-        console.log("urls", url);
       } catch (err) {
         toast.error("Gagal memuat dokumen PDF");
       }

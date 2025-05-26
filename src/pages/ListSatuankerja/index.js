@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Table from "@/components/Table";
 import TableRow from "@/components/TableRow";
 import TablePagination from "@/components/TablePagination";
@@ -13,7 +13,7 @@ import Select from "@/components/Select";
 import Input from "@/components/Input";
 import Textarea from "@/components/TextArea";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import { Plus, Settings } from "lucide-react";
+import { Plus } from "lucide-react";
 import FileInput from "@/components/FileInput";
 import {
   buildQueryString,
@@ -22,7 +22,7 @@ import {
 } from "@/services/GeneralHelper";
 import { toast } from "react-toastify";
 import DatePickerInput from "@/components/DatePickerInput";
-import CustomPDFViewer from "@/components/PDFViewer";
+// import CustomPDFViewer from "@/components/PDFViewer";
 import themeColors from "@/constants/color";
 import TableSortLabel from "@/components/TableSortLabel";
 import { AppContext } from "@/contexts/AppContext";
@@ -30,15 +30,17 @@ import { apiRequest } from "@/services/APIHelper";
 import { useLocation } from "react-router-dom";
 import moment from "moment";
 import {
-  allData,
   columns,
-  fetchPDFAsBlob,
-  fileToBase64,
+  getCurrentSatuanKerja,
 } from "@/pages/ListSatuankerja/satkerHooks";
 
 function ListSatuanKerjaPage() {
-  const { menuName, userData } = useContext(AppContext);
+  const { menuName, listMenu } = useContext(AppContext);
   const location = useLocation();
+
+  const [currentMenu, setCurrentMenu] = useState(
+    getCurrentSatuanKerja(listMenu, location.pathname)
+  );
   const menuTitle = formatUrlPathToTitle(location.pathname);
   const [filter, setFilter] = useState({
     tahun: "",
@@ -48,8 +50,8 @@ function ListSatuanKerjaPage() {
   });
   const [isOpenPDF, setIsOpenPDF] = useState(false);
   const [variantModal, setVariantModal] = useState("");
-  const [sortBy, setSortBy] = useState(null);
-  const [sortDir, setSortDir] = useState("asc");
+  const [sortBy, setSortBy] = useState("created_at");
+  const [sortDir, setSortDir] = useState("desc");
   const [page, setPage] = useState(0);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -99,7 +101,7 @@ function ListSatuanKerjaPage() {
   const fetchTable = async () => {
     try {
       const query = buildQueryString({
-        biro_code: userData.code,
+        biro_code: currentMenu?.code,
         tahun: filter.tahun,
         search_key: filter.searchKey,
         page: page + 1,
@@ -113,7 +115,7 @@ function ListSatuanKerjaPage() {
           ? moment(filter.endDate).format("YYYY-MM-DD").toString()
           : "",
       });
-      const data = await apiRequest(`/api/archive/list?${query}`);
+      const data = await apiRequest({ url: `/api/archive/list?${query}` });
       let result = data.data;
       if (data.success) {
         setTotalPages(result?.last_page);
@@ -126,54 +128,87 @@ function ListSatuanKerjaPage() {
 
   const submitData = async (formData) => {
     try {
-      const base64Dokumen = await fileToBase64(formData.dokumen);
-      const payload = {
-        no_spp: formData?.no_spp,
-        jenis_spp: formData?.type,
-        tahun: formData?.tahun,
-        keterangan: formData?.keterangan,
-        kode_biro: userData?.biro_code,
-        dokumen: base64Dokumen,
-      };
-      const result = await apiRequest("/api/archive/create", "POST", {
-        body: payload,
+      const payload = new FormData();
+      payload.append("kode_biro", currentMenu?.code);
+      payload.append("no_spp", formData.no_spp);
+      payload.append("keterangan", formData.keterangan);
+      payload.append("jenis_spp", formData.type);
+      payload.append("tahun", formData.tahun);
+      payload.append("dokumen", formData.dokumen);
+
+      const result = await apiRequest({
+        url: "/api/archive/create",
+        method: "POST",
+        options: {
+          body: payload,
+        },
+        isMultiType: true,
       });
-      console.log("formDatass", result);
+      console.log(result);
     } catch (error) {
       console.error(error);
     }
   };
 
-  useEffect(() => {
-    fetchTable();
-  }, [
-    filter.tahun,
-    filter.searchKey,
-    page + 1,
-    rowsPerPage,
-    sortBy,
-    sortDir,
-    filter.startDate,
-    filter.endDate,
-  ]);
+  const editData = async (formData) => {
+    try {
+      console.log(formData, currentMenu?.code);
+      const payload = new FormData();
+      payload.append("kode_biro", currentMenu?.code);
+      payload.append("no_spp", formData.no_spp);
+      payload.append("keterangan", formData.keterangan);
+      payload.append("jenis_spp", formData.type);
+      payload.append("tahun", formData.tahun);
+      payload.append("dokumen", formData.dokumen || formData.document);
+
+      const result = await apiRequest({
+        url: `/api/archive/edit/${formData?.id}`,
+        method: "POST",
+        options: {
+          body: payload,
+        },
+        isMultiType: true,
+      });
+      console.log("editData", formData.id, result);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log(formData);
+
+    let isAnyFile = formData?.dokumen || formData?.document;
 
     try {
-      if (
-        !formData?.["no_spp"] ||
-        !formData.tahun ||
-        !formData.type ||
-        !formData.dokumen ||
-        !formData.keterangan
-      ) {
-        toast.error("Mohon lengkapi semua field yang diperlukan.");
-        return;
+      if (variantModal === "Add" && isAnyFile) {
+        if (
+          !formData?.["no_spp"] ||
+          !formData.tahun ||
+          !formData.type ||
+          !formData.dokumen ||
+          !formData.keterangan
+        ) {
+          toast.error("Mohon lengkapi semua field yang diperlukan.");
+          return;
+        }
+      } else {
+        if (
+          !formData?.["no_spp"] ||
+          !formData.tahun ||
+          !formData.type ||
+          !formData.keterangan
+        ) {
+          toast.error("Mohon lengkapi semua field yang diperlukan.");
+          return;
+        }
       }
-
-      submitData(formData);
-      console.log("Submitted:", formData);
+      if (variantModal === "Add") {
+        submitData(formData);
+      } else {
+        editData(formData);
+      }
 
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -192,6 +227,23 @@ function ListSatuanKerjaPage() {
       toast.error("Gagal menyimpan data. Silakan coba lagi.");
     }
   };
+
+  useEffect(() => {
+    fetchTable();
+  }, [
+    filter.tahun,
+    filter.searchKey,
+    page + 1,
+    rowsPerPage,
+    sortBy,
+    sortDir,
+    filter.startDate,
+    filter.endDate,
+  ]);
+
+  useEffect(() => {
+    setCurrentMenu(getCurrentSatuanKerja(listMenu, location.pathname));
+  }, [listMenu]);
 
   return (
     <div>
@@ -215,6 +267,7 @@ function ListSatuanKerjaPage() {
           <Button
             onClick={() => {
               setIsOpenModal(true);
+              setFormData((prev) => ({ ...prev, tahun: moment().year() }));
               setVariantModal("Add");
             }}
             style={{ width: "fit-content" }}
@@ -227,7 +280,8 @@ function ListSatuanKerjaPage() {
             style={{
               width: "calc(100vw/2.2)",
               display: "flex",
-              gap: 10,
+              gap: 15,
+              justifyContent: "right",
             }}
           >
             <Input
@@ -237,20 +291,13 @@ function ListSatuanKerjaPage() {
               value={filter.searchKey}
               onChange={(e) => handleDateChange("searchKey", e.target.value)}
             />
-            <Select
+            <Input
               label="Tahun"
-              name="Tahun"
-              noPlaceholder
               style={{ width: "200px" }}
+              name="Tahun"
               value={filter.tahun}
+              validate={validationSchema.tahun}
               onChange={(e) => handleDateChange("tahun", e.target.value)}
-              options={[
-                { label: "2020", value: "2020" },
-                { label: "2021", value: "2021" },
-                { label: "2022", value: "2022" },
-                { label: "2024", value: "2024" },
-                { label: "2025", value: "2025" },
-              ]}
             />
             <DatePickerInput
               label="Start Date"
@@ -314,12 +361,17 @@ function ListSatuanKerjaPage() {
                 <TableCell
                   align="center"
                   onClick={() => {
-                    setIsOpenPDF(true);
-                    setPDFtoOpen(row.document?.url);
+                    if (typeof row.document.url === "string") {
+                      setIsOpenPDF(true);
+                      setPDFtoOpen(row.document?.url);
+                    }
                   }}
                   style={{
                     color: themeColors.primary.light,
-                    cursor: "pointer",
+                    cursor:
+                      typeof row.document.url === "string"
+                        ? "pointer"
+                        : "default",
                   }}
                 >
                   {row.document?.filename}
@@ -329,7 +381,10 @@ function ListSatuanKerjaPage() {
                   <Button
                     onClick={() => {
                       setVariantModal("Edit");
-                      setFormData(row);
+                      setFormData({
+                        ...row,
+                        type: row.jenis_spp,
+                      });
                       setIsOpenModal(true);
                     }}
                     style={{ width: "fit-content" }}
@@ -381,14 +436,13 @@ function ListSatuanKerjaPage() {
             name="no_spp"
             value={formData?.["no_spp"]}
             onChange={handleChange}
-            validate={validationSchema.onlyNumber}
             required
             placeholder="Masukkan nomor SPP"
           />
           <Input
             label="Tahun"
             name="tahun"
-            value={formData.tahun}
+            value={formData?.tahun}
             onChange={handleChange}
             validate={validationSchema.tahun}
             required
@@ -397,12 +451,13 @@ function ListSatuanKerjaPage() {
           <Select
             label="Jenis SPP"
             name="type"
-            value={formData.type}
+            value={formData?.type}
             onChange={handleChange}
             required
             options={[
               { label: "GUP", value: "GUP" },
               { label: "TUP", value: "TUP" },
+              { label: "LS", value: "LS" },
             ]}
           />
           <FileInput
@@ -411,11 +466,12 @@ function ListSatuanKerjaPage() {
             name="dokumen"
             onChange={handleChange}
             required
+            value={formData?.document}
           />
           <Textarea
             label="Keterangan"
             name="keterangan"
-            value={formData.keterangan}
+            value={formData?.keterangan}
             required
             onChange={handleChange}
             placeholder="Masukkan keterangan tambahan"

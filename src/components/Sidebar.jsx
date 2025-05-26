@@ -1,6 +1,7 @@
-import { Archive, Building, Layers, LogOut, UserRoundCog } from "lucide-react";
-import React, { useState } from "react";
-import { useNavigate, NavLink } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContexts";
+import { Building, Layers, LogOut, UserRoundCog } from "lucide-react";
+import React from "react";
+import { NavLink } from "react-router-dom";
 
 const menuItems = [
   {
@@ -24,7 +25,11 @@ const menuItems = [
 ];
 
 function Sidebar({ isAdmin }) {
-  const navigate = useNavigate();
+  const { logout } = useAuth();
+  const handleLogout = () => {
+    logout();
+    // Optionally navigate to "/" or "/login"
+  };
 
   return (
     <div
@@ -66,13 +71,7 @@ function Sidebar({ isAdmin }) {
             ))}
         </nav>
       </div>
-      <span
-        className="logout-button"
-        onClick={() => {
-          localStorage.clear();
-          navigate("/");
-        }}
-      >
+      <span className="logout-button" onClick={handleLogout}>
         <LogOut />
         Logout
       </span>
