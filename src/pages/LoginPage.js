@@ -92,7 +92,6 @@ function LoginPage() {
               Selamat Datang di Arsip ROKEU BMN
             </span>
           </div>
-          {/* {error && <p style={{ color: "red" }}>{error}</p>} */}
           <form
             onSubmit={handleSubmit}
             style={{ display: "flex", gap: 20, flexDirection: "column" }}
