@@ -11,7 +11,7 @@ import { toast } from "react-toastify";
 function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
-
+  const [errorMessage, setErrorMessage] = useState(null);
   const [formData, setFormData] = useState({
     satker: "",
     password: "",
@@ -40,14 +40,22 @@ function LoginPage() {
         "POST",
         { kode_biro: parseInt(formData.satker), password: encryptedPass }
       );
-
+      console.log(response);
       if (response?.success) {
         login(response?.data?.access_token);
         navigate("/satuan-kerja");
+        setErrorMessage(null);
       } else {
+        console.log(response);
         toast.error(response?.message);
       }
     } catch (err) {
+      setErrorMessage(
+        err.toString().includes("Unauthorized")
+          ? "Kode Satuan Kerja atau Password salah!"
+          : err.toString()
+      );
+      console.log(err, err.toString());
       toast.error(err);
     } finally {
     }
@@ -106,6 +114,11 @@ function LoginPage() {
               value={formData.password}
               onChange={handleChange}
             />
+            {errorMessage && (
+              <span style={{ fontSize: 16, textAlign: "center", color: "red" }}>
+                {errorMessage}
+              </span>
+            )}
 
             <Button type="submit" style={{ width: "100%" }}>
               Login
