@@ -11,7 +11,6 @@ function TablePagination({
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: "1rem",
     gap: "0.5rem",
   };
 

@@ -14,7 +14,7 @@ import Select from "@/components/Select";
 import Input from "@/components/Input";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { Plus, Settings, Trash2, UserRoundSearch } from "lucide-react";
-import { validationSchema } from "@/services/GeneralHelper";
+import { cryptoEncrypter, validationSchema } from "@/services/GeneralHelper";
 import { toast } from "react-toastify";
 import Chip from "@/components/Chip";
 import Dialog from "@/components/Dialog";
@@ -32,10 +32,10 @@ const mapTableData = (data) => {
   let arr = [];
   data.forEach((item, i) => {
     arr.push({
-      "id" : item.id,
+      ...item,
+      id: item.id,
       "biro-code": item.biro_code,
       "biro-name": item.name,
-      // password: ["Admin1", "Pengguna2"][Math.floor(Math.random() * 2)],
       privilege: item.role,
     });
   });
@@ -53,30 +53,30 @@ function UserManagementPage() {
 
   const [searchKey, setSearchKey] = useState("");
   const [tableData, setTableData] = useState();
-  const [focusedData, setFocusedData] = useState(null);
 
   const [formData, setFormData] = useState({
-    kodeBiro: "",
-    name: "",
-    role: "",
+    "biro-code": "",
+    "biro-name": "",
+    privilege: "",
     password: "",
   });
 
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
+    const { name, value } = e.target;
+    console.log(e.target.value, name, value);
     setFormData((prev) => ({
       ...prev,
-      [name]: files ? files[0] : value,
+      [name]: value,
     }));
   };
 
   const submitData = async (formData) => {
     try {
       const payload = {
-        kode_biro: formData.kodeBiro,
-        role: formData.role,
-        password: formData.password,
-        nama: formData.name,
+        kode_biro: formData?.["biro-code"],
+        role: formData.privilege,
+        password: cryptoEncrypter(formData.password),
+        nama: formData?.["biro-name"],
       };
 
       const result = await apiRequest({
@@ -86,9 +86,20 @@ function UserManagementPage() {
           body: payload,
         },
       });
-      console.log(result);
+      if (result.success) {
+        toast.success("Pengguna berhasil diperbaharui!");
+        setIsOpenModal(false);
+        setFormData({
+          "biro-code": "",
+          "biro-name": "",
+          privilege: "",
+          password: "",
+        });
+      } else {
+        toast.error("Gagal menambahkan pengguna. Silakan coba lagi.");
+      }
     } catch (error) {
-      const message = error.response?.message
+      const message = error.response?.message;
       throw new Error(message);
     }
   };
@@ -96,20 +107,36 @@ function UserManagementPage() {
   const editData = async (formData) => {
     try {
       const payload = {
-        kode_biro: formData.kodeBiro,
-        role: formData.role,
-        password: formData.password,
-        nama: formData.name,
+        kode_biro: formData?.["biro-code"],
+        role: formData.privilege,
+        nama: formData?.["biro-name"],
       };
+      if (formData.password) {
+        Object.assign(payload, {
+          password: cryptoEncrypter(formData?.password),
+        });
+      }
 
       const result = await apiRequest({
-        url: "/api/user/edit",
+        url: `/api/user/edit/${formData?.id}`,
         method: "POST",
         options: {
           body: payload,
         },
       });
-      console.log("editData", formData.id, result);
+      console.log(result);
+      if (result.success) {
+        toast.success("Pengguna berhasil ditambahkan!");
+        setIsOpenModal(false);
+        setFormData({
+          "biro-code": "",
+          "biro-name": "",
+          privilege: "",
+          password: "",
+        });
+      } else {
+        toast.error("Gagal menambahkan pengguna. Silakan coba lagi.");
+      }
     } catch (error) {
       return { hasError: true, error };
     }
@@ -120,35 +147,23 @@ function UserManagementPage() {
 
     try {
       if (
-        !formData.kodeBiro ||
-        !formData.name ||
-        !formData.role ||
-        !formData.password
+        !formData["biro-code"] ||
+        !formData["biro-name"] ||
+        !formData.privilege
       ) {
         toast.error("Mohon lengkapi semua field yang diperlukan.");
         return;
       }
 
-      if (variantModal === "Add") {
-        await submitData(formData);
-      } else {
-        await editData(formData);
-      }
-
+      let result =
+        variantModal === "Add"
+          ? await submitData(formData)
+          : await editData(formData);
       await new Promise((resolve) => setTimeout(resolve, 1000));
-
       getListUser();
-      toast.success("Pengguna berhasil ditambahkan!");
-      setIsOpenModal(false);
-      setFormData({
-        kodeBiro: "",
-        name: "",
-        role: "",
-        password: "",
-      });
+      console.log("res", result);
     } catch (err) {
       console.error(err);
-      toast.error("Gagal menambahkan pengguna. Silakan coba lagi.");
     }
   };
 
@@ -188,7 +203,7 @@ function UserManagementPage() {
     } catch (error) {
       console.error(error);
     }
-  }
+  };
 
   useEffect(() => {
     getListUser();
@@ -280,7 +295,7 @@ function UserManagementPage() {
                   <Button
                     onClick={() => {
                       setVariantModal("Detail");
-                      setFocusedData(row);
+                      setFormData(row);
                       setIsOpenModal(true);
                     }}
                     style={{ width: "fit-content" }}
@@ -290,7 +305,7 @@ function UserManagementPage() {
                   <Button
                     onClick={() => {
                       setVariantModal("Edit");
-                      setFocusedData(row);
+                      setFormData(row);
                       setIsOpenModal(true);
                     }}
                     style={{ width: "fit-content" }}
@@ -300,7 +315,7 @@ function UserManagementPage() {
                   <Button
                     onClick={() => {
                       setOpenDialog(true);
-                      setFocusedData(row);
+                      setFormData(row);
                     }}
                     style={{ width: "fit-content" }}
                     variant="danger"
@@ -324,6 +339,7 @@ function UserManagementPage() {
         onClose={() => setIsOpenModal(false)}
         title={`Form ${variantModal} Akun`}
       >
+        {console.log(formData)}
         <form
           onSubmit={handleSubmit}
           style={{
@@ -335,12 +351,8 @@ function UserManagementPage() {
         >
           <Input
             label="Kode Biro"
-            name="kodeBiro"
-            value={
-              variantModal === "Add"
-                ? formData["kodeBiro"]
-                : focusedData?.["biro-code"]
-            }
+            name="biro-code"
+            value={formData["biro-code"]}
             onChange={handleChange}
             validate={validationSchema.onlyNumber}
             required
@@ -349,13 +361,9 @@ function UserManagementPage() {
           />
           <Input
             label="Name"
-            name="name"
+            name="biro-name"
             disabled={variantModal === "Detail"}
-            value={
-              variantModal === "Add"
-                ? formData["name"]
-                : focusedData?.["biro-name"]
-            }
+            value={formData["biro-name"]}
             onChange={handleChange}
             required
             placeholder="Masukkan Nama Biro"
@@ -365,31 +373,22 @@ function UserManagementPage() {
               label="Password"
               name="password"
               type="password"
-              value={
-                variantModal === "Add"
-                  ? formData["password"]
-                  : focusedData?.["password"]
-              }
+              value={formData["password"]}
               onChange={handleChange}
-              validate={validationSchema.password}
-              required
+              // validate={validationSchema.password}
               placeholder="Masukkan password"
             />
           )}
           <Select
             label="Role"
-            name="role"
+            name="privilege"
             disabled={variantModal === "Detail"}
-            value={
-              variantModal === "Add"
-                ? formData["role"]
-                : focusedData?.["privilege"]
-            }
+            value={formData["privilege"]}
             onChange={handleChange}
             required
             options={[
-              { label: "admin", value: "admin" },
-              { label: "user", value: "user" },
+              { label: "Admin", value: "admin" },
+              { label: "User", value: "user" },
             ]}
           />
           {variantModal === "Add" && (
@@ -420,7 +419,7 @@ function UserManagementPage() {
             <Button
               size="medium"
               onClick={() => {
-                deleteUser(focusedData.id)
+                deleteUser(formData.id);
                 toast.success("Akun berhasil Dihapus!", {
                   position: "top-right",
                 });

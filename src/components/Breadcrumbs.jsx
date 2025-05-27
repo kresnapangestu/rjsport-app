@@ -19,7 +19,7 @@ const Breadcrumbs = ({ items }) => {
         alignItems: "center",
         placeItems: "center",
         gap: "8px",
-        marginBottom: "2%",
+        marginBottom: "1rem",
       }}
     >
       <NavLink to={"/satuan-kerja"} style={{ textDecoration: "none" }}>
