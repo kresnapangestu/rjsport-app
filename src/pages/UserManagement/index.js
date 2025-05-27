@@ -18,6 +18,7 @@ import { validationSchema } from "@/services/GeneralHelper";
 import { toast } from "react-toastify";
 import Chip from "@/components/Chip";
 import Dialog from "@/components/Dialog";
+import { apiRequest } from "@/services/APIHelper";
 import { fetchHelperGET } from "@/services/FetchHelper";
 
 const columns = [
@@ -31,6 +32,7 @@ const mapTableData = (data) => {
   let arr = [];
   data.forEach((item, i) => {
     arr.push({
+      "id" : item.id,
       "biro-code": item.biro_code,
       "biro-name": item.name,
       // password: ["Admin1", "Pengguna2"][Math.floor(Math.random() * 2)],
@@ -68,6 +70,51 @@ function UserManagementPage() {
     }));
   };
 
+  const submitData = async (formData) => {
+    try {
+      const payload = {
+        kode_biro: formData.kodeBiro,
+        role: formData.role,
+        password: formData.password,
+        nama: formData.name,
+      };
+
+      const result = await apiRequest({
+        url: "/api/user/register",
+        method: "POST",
+        options: {
+          body: payload,
+        },
+      });
+      console.log(result);
+    } catch (error) {
+      const message = error.response?.message
+      throw new Error(message);
+    }
+  };
+
+  const editData = async (formData) => {
+    try {
+      const payload = {
+        kode_biro: formData.kodeBiro,
+        role: formData.role,
+        password: formData.password,
+        nama: formData.name,
+      };
+
+      const result = await apiRequest({
+        url: "/api/user/edit",
+        method: "POST",
+        options: {
+          body: payload,
+        },
+      });
+      console.log("editData", formData.id, result);
+    } catch (error) {
+      return { hasError: true, error };
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -82,8 +129,15 @@ function UserManagementPage() {
         return;
       }
 
+      if (variantModal === "Add") {
+        await submitData(formData);
+      } else {
+        await editData(formData);
+      }
+
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
+      getListUser();
       toast.success("Pengguna berhasil ditambahkan!");
       setIsOpenModal(false);
       setFormData({
@@ -122,6 +176,19 @@ function UserManagementPage() {
     } finally {
     }
   };
+
+  const deleteUser = async (id) => {
+    try {
+      const result = await apiRequest({
+        url: "/api/user/delete/" + id,
+        method: "DELETE",
+      });
+      console.log(result);
+      getListUser();
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   useEffect(() => {
     getListUser();
@@ -231,7 +298,10 @@ function UserManagementPage() {
                     icon={<Settings size={18} />}
                   ></Button>
                   <Button
-                    onClick={() => setOpenDialog(true)}
+                    onClick={() => {
+                      setOpenDialog(true);
+                      setFocusedData(row);
+                    }}
                     style={{ width: "fit-content" }}
                     variant="danger"
                     icon={<Trash2 size={18} />}
@@ -268,7 +338,7 @@ function UserManagementPage() {
             name="kodeBiro"
             value={
               variantModal === "Add"
-                ? formData["biro-code"]
+                ? formData["kodeBiro"]
                 : focusedData?.["biro-code"]
             }
             onChange={handleChange}
@@ -283,7 +353,7 @@ function UserManagementPage() {
             disabled={variantModal === "Detail"}
             value={
               variantModal === "Add"
-                ? formData["biro-name"]
+                ? formData["name"]
                 : focusedData?.["biro-name"]
             }
             onChange={handleChange}
@@ -312,20 +382,24 @@ function UserManagementPage() {
             disabled={variantModal === "Detail"}
             value={
               variantModal === "Add"
-                ? formData["privilege"]
+                ? formData["role"]
                 : focusedData?.["privilege"]
             }
             onChange={handleChange}
             required
             options={[
               { label: "admin", value: "admin" },
-              { label: "supervisor", value: "supervisor" },
-              { label: "pengguna", value: "pengguna" },
+              { label: "user", value: "user" },
             ]}
           />
           {variantModal === "Add" && (
             <Button type="submit" style={{ float: "right" }}>
               Tambahkan
+            </Button>
+          )}
+          {variantModal === "Edit" && (
+            <Button type="submit" style={{ float: "right" }}>
+              Edit
             </Button>
           )}
         </form>
@@ -346,6 +420,7 @@ function UserManagementPage() {
             <Button
               size="medium"
               onClick={() => {
+                deleteUser(focusedData.id)
                 toast.success("Akun berhasil Dihapus!", {
                   position: "top-right",
                 });
