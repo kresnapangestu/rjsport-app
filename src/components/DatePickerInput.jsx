@@ -95,6 +95,7 @@ function DatePickerInput({
         selectsEnd={selectsEnd}
         startDate={startDate}
         endDate={endDate}
+        dateFormat="dd/MM/yyyy"
         customInput={<input style={inputStyle} />}
         wrapperClassName="date-picker-wrapper"
       />

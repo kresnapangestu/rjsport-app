@@ -248,10 +248,7 @@ function ListSatuanKerjaPage() {
   return (
     <div>
       <Breadcrumbs
-        items={[
-          { name: "Satuan Kerja", path: "/satuan-kerja" },
-          { name: menuName.name },
-        ]}
+        items={[{ name: "Menu", path: "/menu" }, { name: menuName.name }]}
       />
       <Title>{menuName.name || menuTitle}</Title>
       <Paper

@@ -1,4 +1,4 @@
-import { fetchMenu, fetchUser } from "@/pages/Menu/menuHooks";
+import { fetchMenu, fetchUser } from "@/pages/InvoiceMaker/menuHooks";
 import React, { createContext, useEffect, useState } from "react";
 
 export const AppContext = createContext();
@@ -8,48 +8,12 @@ export const AppProvider = ({ children }) => {
   const [listMenu, setListMenu] = useState([]);
   const [userData, setUserData] = useState(null);
   const [isAdmin, setIsAdmin] = useState(null);
-  const token = localStorage.getItem("token");
 
-  useEffect(() => {
-    if (token) {
-      const loadMenu = async () => {
-        try {
-          const menuData = await fetchMenu();
-          setListMenu(menuData.data);
-        } catch (error) {
-          console.error("Error loading menu:", error);
-        }
-      };
-
-      loadMenu();
-    }
-  }, [setListMenu, token]);
+  console.log(listMenu);
 
   const handleChangeMenu = (value) => {
     setMenuName(value);
   };
-  useEffect(() => {
-    if (userData) {
-      if (userData?.role !== "user") {
-        setIsAdmin(true);
-      }
-    }
-  }, [userData]);
-
-  useEffect(() => {
-    if (token) {
-      const loadUser = async () => {
-        try {
-          const userData = await fetchUser();
-          setUserData(userData.data);
-        } catch (error) {
-          console.error("Error loading menu:", error);
-        }
-      };
-
-      loadUser();
-    }
-  }, [setUserData, token]);
 
   return (
     <AppContext.Provider
@@ -60,7 +24,7 @@ export const AppProvider = ({ children }) => {
         setListMenu,
         userData,
         setUserData,
-        isAdmin,
+        // isAdmin,
       }}
     >
       {children}

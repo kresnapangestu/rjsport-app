@@ -131,3 +131,11 @@ export const cryptoEncrypter = (string) => {
   ).toString();
   return encryptedString;
 };
+
+export const formatCurrencies = (value) => {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  }).format(value);
+};

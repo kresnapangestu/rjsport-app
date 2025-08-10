@@ -1,12 +1,12 @@
 import React from "react";
 import Sidebar from "../components/Sidebar";
 
-function AppLayout({ children, isAdmin }) {
+function AppLayout({ children }) {
   return (
     <div style={{ display: "flex" }}>
-      <Sidebar isAdmin={isAdmin} />
+      <Sidebar />
       <div style={{ flex: 1 }}>
-        <div style={{ marginLeft: "230px", padding: "1rem" }}>{children}</div>
+        <div style={{ marginLeft: "200px", padding: "1rem" }}>{children}</div>
       </div>
     </div>
   );

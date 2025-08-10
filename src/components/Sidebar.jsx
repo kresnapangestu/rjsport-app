@@ -1,42 +1,29 @@
-import { useAuth } from "@/contexts/AuthContexts";
-import { Building, Layers, LogOut, UserRoundCog } from "lucide-react";
+import { FileText, Layers, LogOut, UserRoundCog } from "lucide-react";
 import React from "react";
 import { NavLink } from "react-router-dom";
 
 const menuItems = [
   {
-    name: "Satuan Kerja",
-    path: "/satuan-kerja",
-    icon: <Building />,
+    name: "Invoice Maker",
+    path: "/invoice-maker",
+    icon: <FileText />,
     adminOnly: false,
   },
   {
-    name: "Kompilasi",
-    path: "/compilation",
-    icon: <Layers />,
-    adminOnly: true,
-  },
-  {
-    name: "Manajemen Akun",
-    path: "/user-management",
-    icon: <UserRoundCog />,
-    adminOnly: true,
+    name: "Lembar Kerja Produksi",
+    path: "/lembar-kerja-produksi-maker",
+    icon: <FileText />,
+    adminOnly: false,
   },
 ];
 
 function Sidebar({ isAdmin }) {
-  const { logout } = useAuth();
-  const handleLogout = () => {
-    logout();
-    // Optionally navigate to "/" or "/login"
-  };
-
   return (
     <div
       style={{
         width: "200px",
         height: "100vh",
-        background: "#15406A",
+        background: "#2AC6EE",
         padding: "1rem",
         display: "flex",
         flexDirection: "column",
@@ -47,34 +34,30 @@ function Sidebar({ isAdmin }) {
       }}
     >
       <div style={{ justifyItems: "center" }}>
-        <img
-          src="/logo-kemnaker.png"
-          alt="logo"
-          width="160"
-          style={{ marginBottom: "2rem" }}
-        ></img>
+        <div>
+          <img
+            src="/rjsport-logo.png"
+            alt="logo"
+            width="160"
+            style={{ marginBottom: "2rem" }}
+          />
+        </div>
         <nav>
-          {menuItems
-            .filter((item) => isAdmin || !item.adminOnly) // show all if admin, only non-admin if not
-            .map((item) => (
-              <div key={item.path}>
-                <NavLink
-                  to={item.path}
-                  className={({ isActive }) =>
-                    `sidebar-link${isActive ? " active" : ""}`
-                  }
-                >
-                  {item.icon}
-                  {item.name}
-                </NavLink>
-              </div>
-            ))}
+          {menuItems.map((item) => (
+            <div key={item.path}>
+              <NavLink
+                to={item.path}
+                className={({ isActive }) =>
+                  `sidebar-link${isActive ? " active" : ""}`
+                }
+              >
+                {item.icon}
+                {item.name}
+              </NavLink>
+            </div>
+          ))}
         </nav>
       </div>
-      <span className="logout-button" onClick={handleLogout}>
-        <LogOut />
-        Logout
-      </span>
     </div>
   );
 }

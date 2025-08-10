@@ -1,8 +1,8 @@
 const themeColors = {
   primary: {
-    default: "#15406A", // Navy Blue
-    light: "#3F73A0", // Sky Blue
-    dark: "#102D4C", // Midnight
+    default: "#26C5EC", // Vibrant Light Blue
+    light: "#5ED9F4", // Lighter Blue
+    dark: "#1A9AB9", // Deeper Blue
   },
   accent: "#4CD4B0", // Mint Green
   background: "#F5F7FA", // Light Gray

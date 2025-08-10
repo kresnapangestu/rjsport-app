@@ -7,6 +7,7 @@ function Input({
   label,
   type = "text",
   value,
+  className,
   onChange,
   placeholder,
   disabled = false,
@@ -16,6 +17,7 @@ function Input({
   style,
   validate = () => "",
   required = false,
+  prefix = "",
 }) {
   const [isFocused, setFocused] = useState(false);
   const [localError, setLocalError] = useState("");
@@ -103,7 +105,7 @@ function Input({
   };
 
   return (
-    <div style={containerStyle}>
+    <div style={containerStyle} className={className}>
       <label style={labelStyle}>{label}</label>
       <input
         type={inputType}
@@ -147,6 +149,7 @@ Input.propTypes = {
   style: PropTypes.object,
   validate: PropTypes.func,
   required: PropTypes.bool,
+  prefix: PropTypes.string,
 };
 
 export default Input;

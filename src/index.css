@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @font-face {
   font-family: "Funnel Display";
   src: url("/public/fonts/FunnelDisplay-Light.ttf") format("ttf");
@@ -92,12 +96,12 @@ code {
 }
 
 .sidebar-link:hover {
-  background: #1d5c9c;
+  background: #12a8cd;
 }
 
 .sidebar-link.active {
   font-weight: bold;
-  background: #1d5c9c;
+  background: #12a8cd;
 }
 
 .pdf-viewer {
@@ -128,7 +132,7 @@ code {
 }
 
 .logout-button:hover {
-  background: #1d5c9c;
+  background: #12a8cd;
 }
 
 .pdf-document {

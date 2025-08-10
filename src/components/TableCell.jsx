@@ -18,6 +18,7 @@ function TableCell({
     padding: "10px 16px",
     textAlign,
     fontWeight: component === "th" ? 600 : 400,
+    color: component === "th" ? "white" : "black",
     borderBottom: "1px solid #e0e0e0",
     ...sx,
   };
