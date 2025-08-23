@@ -145,13 +145,17 @@ const PDFContent = forwardRef((props, ref) => {
               💸 Mandiri : 1300010068289
               <br /> A/N Doni Santosa
             </span>
-            {invoiceData?.image && (
-              <img
-                src={URL.createObjectURL(invoiceData?.image)}
-                className="w-56 object-cover rounded border mb-2"
-                alt="invoice pictures"
-              />
-            )}
+            <div className="flex justify-between gap-4">
+              {invoiceData?.image.length > 0 &&
+                invoiceData?.image.map((image, index) => (
+                  <img
+                    src={URL.createObjectURL(image)}
+                    key={index}
+                    className="w-56 object-cover rounded border mb-2"
+                    alt="invoice pictures"
+                  />
+                ))}
+            </div>
           </div>
         </div>
       </div>

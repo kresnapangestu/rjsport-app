@@ -1,69 +1,61 @@
-import Button from "@/components/Button";
 import Table from "@/components/Table";
 import { TableBody } from "@/components/TableBody";
 import TableCell from "@/components/TableCell";
-import TableHeader from "@/components/TableHeader";
 import TableRow from "@/components/TableRow";
-import { InvoiceContext } from "@/contexts/InvoiceContext";
-import moment from "moment";
 import React, { forwardRef, useContext } from "react";
-import { TableHeaders } from "./constants";
-import { formatCurrencies } from "@/services/GeneralHelper";
-import { sumPrice, sumQty } from "./menuHooks";
+import { LKPContext } from "@/contexts/LKPContext";
 
 const PDFContent = forwardRef((props, ref) => {
-  const { invoiceData } = useContext(InvoiceContext);
+  const { invoiceData } = useContext(LKPContext);
   return (
     <div
       ref={ref}
-      className="flex flex-col gap-5 border bg-white rouded h-full"
+      className="flex flex-col gap-5 border bg-white rouded h-full text-lg font-semibold"
       style={{
-        height: "1000px",
+        height: "1500px",
       }}
     >
-      <img alt="header invoice" src="/header.png" />
+      <img alt="header invoice" src="/LKPHeader.webp" />
       <div className="px-10 py-4">
         <div className="flex flex-col gap-1">
           <div className="flex justify-between">
             <span className="text-[#2AC6EE] font-bold">
-              Kepada<br></br>
-              <span className=" text-black font-semibold">
-                {invoiceData?.client}
+              Nama Orderan :
+              <span className=" text-black font-semibold ml-2">
+                {invoiceData?.orderName}
               </span>
             </span>
-            <div className="flex flex-col gap-1">
-              <div className="text-right">
-                <span className="text-[#2AC6EE] font-bold">
-                  No. Invoice&nbsp;
-                </span>
-                <span className="font-semibold">INV-{invoiceData?.number}</span>
-              </div>
-              <div className="text-right">
-                <span className="text-[#2AC6EE] font-bold">
-                  Tanggal Pembuatan&nbsp;
-                </span>
-                <span className="font-semibold">
-                  {invoiceData?.date
-                    ? moment(invoiceData.date).format("DD/MM/YYYY")
-                    : "-"}
-                  {console.log(invoiceData, invoiceData?.date)}
-                </span>
-              </div>
-            </div>
           </div>
           <Table
             sx={{ minWidth: 650 }}
-            className="mt-16"
+            className="mt-6"
             aria-label="simple table"
           >
-            <TableHeader>
-              <TableRow>
-                {TableHeaders.map((header) => (
-                  <TableCell align="center">{header}</TableCell>
-                ))}
+            <TableBody className="text-lg font-semibold">
+              <TableRow
+                className={"bg-blue-500 text-white"}
+                sx={{
+                  "&:lastChild td, &:lastChild th": { borderBottom: "none" },
+                }}
+              >
+                <TableCell
+                  colSpan={2}
+                  className="!text-white flex justify-between"
+                >
+                  <span> Bahan/Warna : </span>{" "}
+                  <span className="!text-white !font-bold">
+                    {invoiceData?.material}
+                  </span>
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
+              <TableRow
+                className={"bg-[#DBE9F8]"}
+                sx={{
+                  "&:lastChild td, &:lastChild th": { borderBottom: "none" },
+                }}
+              >
+                <TableCell colSpan={2}>Detail :</TableCell>
+              </TableRow>
               {invoiceData?.items.map((row, index) => (
                 <TableRow
                   key={index}
@@ -72,14 +64,8 @@ const PDFContent = forwardRef((props, ref) => {
                     "&:lastChild td, &:lastChild th": { borderBottom: "none" },
                   }}
                 >
-                  <TableCell align="center">{row?.description}</TableCell>
-                  <TableCell align="center">{row?.size}</TableCell>
-                  <TableCell align="center">{row?.qty}</TableCell>
-                  <TableCell align="center">
-                    {formatCurrencies(row?.price)}
-                  </TableCell>
-                  <TableCell align="center">
-                    {formatCurrencies(row?.price * row?.qty)}
+                  <TableCell colSpan={2}>
+                    {index + 1}. {row}
                   </TableCell>
                 </TableRow>
               ))}
@@ -89,70 +75,54 @@ const PDFContent = forwardRef((props, ref) => {
                   "&:lastChild td, &:lastChild th": { borderBottom: "none" },
                 }}
               >
-                <TableCell className="!text-white !font-bold" align="center">
-                  Sub Total
-                </TableCell>
-                <TableCell></TableCell>
-                <TableCell className="!text-white !font-bold" align="center">
-                  {sumQty(invoiceData?.items)}
-                </TableCell>
-                <TableCell></TableCell>
-                <TableCell className="!text-white !font-bold" align="center">
-                  {formatCurrencies(sumPrice(invoiceData?.items))}
+                <TableCell
+                  colSpan={2}
+                  className="!text-white flex justify-between"
+                >
+                  <span> Jumlah </span>{" "}
+                  <span className="!text-white !font-bold">
+                    {invoiceData?.amount}
+                  </span>
                 </TableCell>
               </TableRow>
               <TableRow
-                className={"bg-[#ffffff]"}
+                colSpan={2}
+                className={"bg-[#FFFFFF]"}
                 sx={{
                   "&:lastChild td, &:lastChild th": { borderBottom: "none" },
                 }}
               >
-                <TableCell className=" !font-bold" align="center">
-                  DP
-                </TableCell>
-                <TableCell></TableCell>
-                <TableCell></TableCell>
-                <TableCell></TableCell>
-                <TableCell className="!font-bold" align="center">
-                  {formatCurrencies(invoiceData?.downPayment)}
+                <TableCell rowSpan={2} className="flex justify-between">
+                  <span> Detail Ukuran </span>{" "}
+                  <span className="!font-bold">{invoiceData?.sizeDetails}</span>
                 </TableCell>
               </TableRow>
-              <TableRow
-                className={"bg-[#008CCC]"}
-                sx={{
-                  "&:lastChild td, &:lastChild th": { borderBottom: "none" },
-                }}
-              >
-                <TableCell className="!text-white !font-bold" align="center">
-                  Sisa
+              <TableRow>
+                <TableCell rowSpan={2} className="flex justify-evenly">
+                  {invoiceData?.image.length > 0 &&
+                    invoiceData?.image.map((image, index) => (
+                      <img
+                        src={URL.createObjectURL(image)}
+                        key={index}
+                        className="w-56 object-cover rounded border mb-2"
+                        alt="invoice pictures"
+                      />
+                    ))}
                 </TableCell>
-                <TableCell></TableCell>
-                <TableCell></TableCell>
-                <TableCell></TableCell>
-                <TableCell className="!text-white !font-bold" align="center">
-                  {formatCurrencies(
-                    parseInt(sumPrice(invoiceData?.items)) -
-                      parseInt(invoiceData?.downPayment)
+              </TableRow>
+              <TableRow>
+                <TableCell rowSpan={2} className="place-items-center">
+                  {invoiceData?.sizeChart && (
+                    <img
+                      src={URL.createObjectURL(invoiceData?.sizeChart[0])}
+                      className="w-56 object-cover rounded border mb-2"
+                      alt="invoice pictures"
+                    />
                   )}
                 </TableCell>
               </TableRow>
             </TableBody>
           </Table>
-          <div className="flex justify-between gap-10 mt-10">
-            <span className="w-[200px] text-sm font-semibold">
-              Cara Pembayaran
-              <br /> Transfer Bank <br />
-              💸 Mandiri : 1300010068289
-              <br /> A/N Doni Santosa
-            </span>
-            {invoiceData?.image && (
-              <img
-                src={URL.createObjectURL(invoiceData?.image)}
-                className="w-56 object-cover rounded border mb-2"
-                alt="invoice pictures"
-              />
-            )}
-          </div>
         </div>
       </div>
     </div>

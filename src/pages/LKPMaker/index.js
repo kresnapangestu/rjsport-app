@@ -2,22 +2,27 @@ import React, { useContext, useRef } from "react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { FormLKP } from "./FormLKP";
 import { ContentPreview } from "./ContentPreview";
-import { InvoiceContext } from "@/contexts/InvoiceContext";
 import useDownloadPDF from "./useDownloadPDF";
 import moment from "moment";
+import { LKPContext } from "@/contexts/LKPContext";
 
 function LKPMakerPage() {
-  const { toggle, invoiceData } = useContext(InvoiceContext);
-  const fileName = `INVOICE RJSPORT - ${invoiceData?.client}_${moment(
-    invoiceData.date
-  ).format("DD-MM-YYYY")}`;
+  const { toggle, invoiceData } = useContext(LKPContext);
+  const fileName = `LEMBAR KERJA PRODUKSI - RJSPORT - ${
+    invoiceData?.client
+  }_${moment(invoiceData.date).format("DD-MM-YYYY")}`;
   const { downloadPDFByRef } = useDownloadPDF(fileName);
   const invoiceRef = useRef();
 
   return (
     <div style={{ padding: "10px 1rem" }}>
       <Breadcrumbs
-        items={[{ name: "Invoice Maker", path: "/invoice-maker" }]}
+        items={[
+          {
+            name: "Lembar Kerja Produksi",
+            path: "/lembar-kerja-produksi-maker",
+          },
+        ]}
       />
       <div
         className={`grid ${

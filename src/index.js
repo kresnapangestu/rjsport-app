@@ -5,6 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContexts";
 import { AppProvider } from "./contexts/AppContext";
 import { InvoiceProvider } from "./contexts/InvoiceContext";
+import { LKPProvider } from "./contexts/LKPContext";
 // import "@/PDFWorkerSetup";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
@@ -12,7 +13,9 @@ root.render(
   <BrowserRouter>
     <AppProvider>
       <InvoiceProvider>
-        <App />
+        <LKPProvider>
+          <App />
+        </LKPProvider>
       </InvoiceProvider>
     </AppProvider>
   </BrowserRouter>

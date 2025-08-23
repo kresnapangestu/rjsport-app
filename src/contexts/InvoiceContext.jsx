@@ -2,6 +2,7 @@
 import { createContext, useContext, useState } from "react";
 
 export const InvoiceContext = createContext();
+
 // Custom Provider
 export const InvoiceProvider = ({ children }) => {
   const [toggle, setToogle] = useState(true);
@@ -12,7 +13,7 @@ export const InvoiceProvider = ({ children }) => {
     date: null,
     downPayment: 0,
     totalAmount: 0,
-    image: null,
+    image: [], // now an array of File objects
   });
 
   const toggleInvoice = () => setToogle(!toggle);
@@ -24,20 +25,24 @@ export const InvoiceProvider = ({ children }) => {
       [key]: value,
     }));
   };
-  const handleImageChange = (file) => {
-    if (file) {
+
+  // ⬇️ updated for multiple images
+  const handleImageChange = (files) => {
+    if (Array.isArray(files)) {
       setInvoiceData((prev) => ({
         ...prev,
-        image: file,
+        image: files, // store all files as array
       }));
     }
   };
+
   const addInvoiceItem = () => {
     setInvoiceData((prev) => ({
       ...prev,
       items: [...prev.items, { description: "", size: "", qty: "", price: "" }],
     }));
   };
+
   const updateInvoiceItemField = (index, field, value) => {
     setInvoiceData((prev) => {
       const updatedItems = [...prev.items];
@@ -67,7 +72,7 @@ export const InvoiceProvider = ({ children }) => {
         invoiceData,
         updateInvoiceField,
         addInvoiceItem,
-        handleImageChange,
+        handleImageChange, // updated
         updateInvoiceItemField,
         deleteInvoiceItem,
       }}

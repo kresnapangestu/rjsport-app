@@ -1,7 +1,1 @@
-export const TableHeaders = [
-  "Deskripsi",
-  "Size",
-  "Kuantitas",
-  "Harga",
-  "Jumlah",
-];
+export const TableHeaders = [];

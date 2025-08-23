@@ -5,6 +5,8 @@ function TableCell({
   align = "left",
   component = "td",
   scope,
+  colSpan = 1,
+  rowSpan = 1,
   sx = {},
   style = {},
   ...props
@@ -24,7 +26,13 @@ function TableCell({
   };
 
   return (
-    <Component style={defaultStyle} scope={scope} {...props}>
+    <Component
+      style={defaultStyle}
+      scope={scope}
+      colspan={colSpan.toString()}
+      rowspan={rowSpan.toString()}
+      {...props}
+    >
       {children}
     </Component>
   );
