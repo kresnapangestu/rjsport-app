@@ -9,10 +9,10 @@ export const LKPProvider = ({ children }) => {
   const [invoiceData, setLKPData] = useState({
     orderName: "",
     material: "",
-    items: [],
+    items: [""],
     sizeDetails: "",
     image: [], // array of File objects
-    sizeChart: null, // array of File objects
+    sizeChart: [], // array of File objects
   });
 
   const toggleLKP = () => setToggle((prev) => !prev);

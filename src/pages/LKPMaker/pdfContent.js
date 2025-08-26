@@ -104,7 +104,7 @@ const PDFContent = forwardRef((props, ref) => {
                       <img
                         src={URL.createObjectURL(image)}
                         key={index}
-                        className="w-56 object-cover rounded border mb-2"
+                        className="h-56 object-cover rounded border mb-2"
                         alt="invoice pictures"
                       />
                     ))}
@@ -112,9 +112,9 @@ const PDFContent = forwardRef((props, ref) => {
               </TableRow>
               <TableRow>
                 <TableCell rowSpan={2} className="place-items-center">
-                  {invoiceData?.sizeChart && (
+                  {invoiceData?.sizeChart.length > 0 && (
                     <img
-                      src={URL.createObjectURL(invoiceData?.sizeChart[0])}
+                      src={URL.createObjectURL(invoiceData?.sizeChart?.[0])}
                       className="w-56 object-cover rounded border mb-2"
                       alt="invoice pictures"
                     />

@@ -67,7 +67,7 @@ export const FormLKP = () => {
           className="cursor-pointer text-blue-400 hover:text-blue-500 active:text-blue-700"
           onClick={addLKPItem}
         >
-          + Tambah kolom
+          + Tambah kolom Detail
         </span>
       </div>
       <Input

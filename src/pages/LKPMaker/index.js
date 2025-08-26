@@ -9,8 +9,8 @@ import { LKPContext } from "@/contexts/LKPContext";
 function LKPMakerPage() {
   const { toggle, invoiceData } = useContext(LKPContext);
   const fileName = `LEMBAR KERJA PRODUKSI - RJSPORT - ${
-    invoiceData?.client
-  }_${moment(invoiceData.date).format("DD-MM-YYYY")}`;
+    invoiceData?.orderName
+  } - ${moment(invoiceData.date).format("DD-MM-YYYY")}`;
   const { downloadPDFByRef } = useDownloadPDF(fileName);
   const invoiceRef = useRef();
 
