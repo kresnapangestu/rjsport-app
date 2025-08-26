@@ -114,7 +114,7 @@ export const FormInvoice = () => {
           className="cursor-pointer text-blue-400 hover:text-blue-500 active:text-blue-700"
           onClick={addInvoiceItem}
         >
-          + Tambah kolom
+          + Tambah kolom Item
         </span>
       </div>
       <UploadImage

@@ -11,8 +11,8 @@ export const InvoiceProvider = ({ children }) => {
     client: "",
     items: [{ description: "", size: "", qty: "", price: "" }],
     date: null,
-    downPayment: 0,
-    totalAmount: 0,
+    downPayment: null,
+    totalAmount: null,
     image: [], // now an array of File objects
   });
 
